@@ -28,7 +28,7 @@ def focal(alpha=0.25, gamma=2.0):
     Returns
         A functor that computes the focal loss using the alpha and gamma.
     """
-    def _focal(y_true, y_pred, lams):
+    def _focal(y_true, y_pred):
         """ Compute the focal loss given the target tensor and the predicted tensor.
 
         As defined in https://arxiv.org/abs/1708.02002
@@ -36,7 +36,6 @@ def focal(alpha=0.25, gamma=2.0):
         Args
             y_true: Tensor of target data from the generator with shape (B, N, num_classes).
             y_pred: Tensor of predicted data from the network with shape (B, N, num_classes).
-            lams: Tensor of weights for each image in batch (B, N, 1)
 
         Returns
             The focal loss of y_pred w.r.t. y_true.
@@ -50,7 +49,6 @@ def focal(alpha=0.25, gamma=2.0):
         
         labels         = backend.gather_nd(labels, indices)
         classification = backend.gather_nd(classification, indices)
-        lams           = backend.gather_nd(lams, indices)
 
         # compute the focal loss
         alpha_factor = keras.backend.ones_like(labels) * alpha
@@ -59,8 +57,7 @@ def focal(alpha=0.25, gamma=2.0):
         focal_weight = alpha_factor * focal_weight ** gamma
 
         mixup_labels = keras.backend.zeros_like(labels)
-        cls_loss     = focal_weight * (keras.backend.binary_crossentropy(labels, classification) * lams + 
-                         keras.backend.binary_crossentropy(mixup_labels, classification) * (1 - lams))
+        cls_loss     = focal_weight * keras.backend.binary_crossentropy(labels, classification)
 
         # compute the normalizer: the number of positive anchors
         normalizer = backend.where(keras.backend.equal(anchor_state, 1))
@@ -71,6 +68,19 @@ def focal(alpha=0.25, gamma=2.0):
 
     return _focal
 
+def ctc():
+    """ Create a functor for computing the CTC loss.
+
+    Args
+        None
+
+    Returns
+        A functor that computes the CTC loss.
+    """
+    def _ctc(y_true, y_pred):
+        pass
+
+    return _ctc
 
 def smooth_l1(sigma=3.0):
     """ Create a smooth L1 loss functor.
@@ -83,7 +93,7 @@ def smooth_l1(sigma=3.0):
     """
     sigma_squared = sigma ** 2
 
-    def _smooth_l1(y_true, y_pred, lams):
+    def _smooth_l1(y_true, y_pred):
         """ Compute the smooth L1 loss of y_pred w.r.t. y_true.
 
         Args
@@ -103,7 +113,6 @@ def smooth_l1(sigma=3.0):
 
         regression        = backend.gather_nd(regression, indices)
         regression_target = backend.gather_nd(regression_target, indices)
-        # lams              = backend.gather_nd(lams, indices)
 
         # compute smooth L1 loss
         # f(x) = 0.5 * (sigma * x)^2          if |x| < 1 / sigma / sigma
@@ -116,8 +125,6 @@ def smooth_l1(sigma=3.0):
             0.5 * sigma_squared * keras.backend.pow(regression_diff, 2),
             regression_diff - 0.5 / sigma_squared
         )
-
-        # regression_loss = regression_loss * lams
 
         # compute the normalizer: the number of positive anchors
         normalizer = keras.backend.maximum(1, keras.backend.shape(indices)[0])
