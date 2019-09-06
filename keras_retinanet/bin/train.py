@@ -41,10 +41,9 @@ from .. import models
 from ..callbacks import RedirectModel
 from ..callbacks.eval import Evaluate
 from ..models.retinanet import retinanet_bbox
-from ..preprocessing.csv_generator import CSVGenerator
-from ..preprocessing.kitti import KittiGenerator
-from ..preprocessing.open_images import OpenImagesGenerator
-from ..preprocessing.pascal_voc import PascalVocGenerator
+
+from ..preprocessing.text_generator import TextGenerator
+
 from ..utils.anchors import make_shapes_callback
 from ..utils.config import read_config_file, parse_anchor_parameters
 from ..utils.keras_version import check_keras_version
@@ -135,8 +134,8 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
     # compile model
     training_model.compile(
         loss={
-            'regression'    : wrapped_partial(losses.smooth_l1(), lams=weights_tensor),
-            'classification': wrapped_partial(losses.focal(), lams=weights_tensor)
+            'regression'    : wrapped_partial(losses.smooth_l1()),
+            'classification': wrapped_partial(losses.ctc())
         },
         optimizer=keras.optimizers.adam(lr=lr, clipnorm=0.001)
     )
@@ -259,98 +258,18 @@ def create_generators(args, preprocess_image):
         transform_generator = random_transform_generator(flip_x_chance=0.5)
         visual_effect_generator = None
 
-    if args.dataset_type == 'coco':
-        # import here to prevent unnecessary dependency on cocoapi
-        from ..preprocessing.coco import CocoGenerator
+    train_generator = TextGenerator(
+        args.monogram_path,
+        transform_generator=transform_generator,
+        visual_effect_generator=visual_effect_generator,
+        **common_args
+    )
 
-        train_generator = CocoGenerator(
-            args.coco_path,
-            'train2017',
-            transform_generator=transform_generator,
-            visual_effect_generator=visual_effect_generator,
-            **common_args
-        )
-
-        validation_generator = CocoGenerator(
-            args.coco_path,
-            'val2017',
-            shuffle_groups=False,
-            **common_args
-        )
-    elif args.dataset_type == 'pascal':
-        train_generator = PascalVocGenerator(
-            args.pascal_path,
-            'trainval',
-            transform_generator=transform_generator,
-            visual_effect_generator=visual_effect_generator,
-            **common_args
-        )
-
-        validation_generator = PascalVocGenerator(
-            args.pascal_path,
-            'test',
-            shuffle_groups=False,
-            **common_args
-        )
-    elif args.dataset_type == 'csv':
-        train_generator = CSVGenerator(
-            args.annotations,
-            args.classes,
-            mixup_file=args.mixup_path,
-            transform_generator=transform_generator,
-            visual_effect_generator=visual_effect_generator,
-            **common_args
-        )
-
-        if args.val_annotations:
-            validation_generator = CSVGenerator(
-                args.val_annotations,
-                args.classes,
-                shuffle_groups=False,
-                **common_args
-            )
-        else:
-            validation_generator = None
-    elif args.dataset_type == 'oid':
-        train_generator = OpenImagesGenerator(
-            args.main_dir,
-            subset='train',
-            version=args.version,
-            labels_filter=args.labels_filter,
-            annotation_cache_dir=args.annotation_cache_dir,
-            parent_label=args.parent_label,
-            transform_generator=transform_generator,
-            visual_effect_generator=visual_effect_generator,
-            **common_args
-        )
-
-        validation_generator = OpenImagesGenerator(
-            args.main_dir,
-            subset='validation',
-            version=args.version,
-            labels_filter=args.labels_filter,
-            annotation_cache_dir=args.annotation_cache_dir,
-            parent_label=args.parent_label,
-            shuffle_groups=False,
-            **common_args
-        )
-    elif args.dataset_type == 'kitti':
-        train_generator = KittiGenerator(
-            args.kitti_path,
-            subset='train',
-            transform_generator=transform_generator,
-            visual_effect_generator=visual_effect_generator,
-            **common_args
-        )
-
-        validation_generator = KittiGenerator(
-            args.kitti_path,
-            subset='val',
-            shuffle_groups=False,
-            **common_args
-        )
-    else:
-        raise ValueError('Invalid data type received: {}'.format(args.dataset_type))
+    validation_generator = TextGenerator(
+        args.monogram_path,
+        shuffle_groups=False,
+        **common_args
+    )
 
     return train_generator, validation_generator
 
@@ -393,35 +312,16 @@ def parse_args(args):
     subparsers = parser.add_subparsers(help='Arguments for specific dataset types.', dest='dataset_type')
     subparsers.required = True
 
-    coco_parser = subparsers.add_parser('coco')
-    coco_parser.add_argument('coco_path', help='Path to dataset directory (ie. /tmp/COCO).')
-
-    pascal_parser = subparsers.add_parser('pascal')
-    pascal_parser.add_argument('pascal_path', help='Path to dataset directory (ie. /tmp/VOCdevkit).')
-
-    kitti_parser = subparsers.add_parser('kitti')
-    kitti_parser.add_argument('kitti_path', help='Path to dataset directory (ie. /tmp/kitti).')
-
     def csv_list(string):
         return string.split(',')
-
-    oid_parser = subparsers.add_parser('oid')
-    oid_parser.add_argument('main_dir', help='Path to dataset directory.')
-    oid_parser.add_argument('--version',  help='The current dataset version is v4.', default='v4')
-    oid_parser.add_argument('--labels-filter',  help='A list of labels to filter.', type=csv_list, default=None)
-    oid_parser.add_argument('--annotation-cache-dir', help='Path to store annotation cache.', default='.')
-    oid_parser.add_argument('--parent-label', help='Use the hierarchy children of this label.', default=None)
-
-    csv_parser = subparsers.add_parser('csv')
-    csv_parser.add_argument('annotations', help='Path to CSV file containing annotations for training.')
-    csv_parser.add_argument('classes', help='Path to a CSV file containing class label mapping.')
-    csv_parser.add_argument('--val-annotations', help='Path to CSV file containing annotations for validation (optional).')
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--snapshot',          help='Resume training from a snapshot.')
     group.add_argument('--imagenet-weights',  help='Initialize the model with pretrained imagenet weights. This is the default behaviour.', action='store_const', const=True, default=True)
     group.add_argument('--weights',           help='Initialize the model with weights from a file.')
     group.add_argument('--no-weights',        help='Don\'t initialize the model with any weights.', dest='imagenet_weights', action='store_const', const=False)
+
+    parser.add_argument('--monogram-path',    help='Path to file containing monogram words for training')
 
     parser.add_argument('--backbone',         help='Backbone model used by retinanet.', default='resnet50', type=str)
     parser.add_argument('--batch-size',       help='Size of the batches.', default=1, type=int)
@@ -431,7 +331,7 @@ def parse_args(args):
     parser.add_argument('--epochs',           help='Number of epochs to train.', type=int, default=50)
     parser.add_argument('--steps',            help='Number of steps per epoch.', type=int, default=10000)
     parser.add_argument('--lr',               help='Learning rate.', type=float, default=1e-5)
-    parser.add_argument('--mixup-path',       help='Path to CSV file containing images used as mixup', default=None)
+
     parser.add_argument('--snapshot-path',    help='Path to store snapshots of models during training (defaults to \'./snapshots\')', default='./snapshots')
     parser.add_argument('--logger-dir',       help='Log directory for Tensorboard output', default='./logs')
     parser.add_argument('--no-snapshots',     help='Disable saving snapshots.', dest='snapshots', action='store_false')
@@ -508,13 +408,7 @@ def main(args=None):
         )
 
     # print model summary
-    # print(model.summary())
-
-    # this lets the generator compute backbone layer shapes using the actual backbone model
-    if 'vgg' in args.backbone or 'densenet' in args.backbone:
-        train_generator.compute_shapes = make_shapes_callback(model)
-        if validation_generator:
-            validation_generator.compute_shapes = train_generator.compute_shapes
+    print(model.summary())
 
     # create the callbacks
     callbacks = create_callbacks(

@@ -51,12 +51,6 @@ def backbone(backbone_name):
     """
     if 'resnet' in backbone_name:
         from .resnet import ResNetBackbone as b
-    elif 'mobilenet' in backbone_name:
-        from .mobilenet import MobileNetBackbone as b
-    elif 'vgg' in backbone_name:
-        from .vgg import VGGBackbone as b
-    elif 'densenet' in backbone_name:
-        from .densenet import DenseNetBackbone as b
     else:
         raise NotImplementedError('Backbone class for  \'{}\' not implemented.'.format(backbone))
 
