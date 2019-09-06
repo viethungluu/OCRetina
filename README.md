@@ -10,7 +10,7 @@ Facebook's Rosetta system for text detection and recognition in images (source: 
 **Proposed one-stage OCR system**
 Proposed one-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)
 
-![Proposed one-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)](/images/onestage.PNG)
+![Proposed one-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)](/images/onestage.png)
 
 
 **References**
