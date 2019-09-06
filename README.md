@@ -3,17 +3,20 @@
 End-to-end one-stage CNNs for text detection and recognition based on RetinaNet. 
 
 **Two-stage OCR system**
+
 Facebook's Rosetta system for text detection and recognition in images (source: Facebook \[3\])
 
 ![Facebook's Rosetta system for text detection and recognition in images (source: Facebook \[3\])](/images/rosetta.PNG)
 
 **Proposed one-stage OCR system**
+
 Proposed one-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)
 
 ![Proposed one-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)](/images/onestage.png)
 
 
 **References**
+
 [1] RetinaNet: https://arxiv.org/abs/1708.02002
 
 [2] CTC loss:  http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.139.5852
