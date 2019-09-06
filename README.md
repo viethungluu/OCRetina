@@ -24,6 +24,7 @@ Proposed one-stage architecture for text detection and recognition in images. Im
 [3] Rosetta: https://research.fb.com/wp-content/uploads/2018/10/Rosetta-Large-scale-system-for-text-detection-and-recognition-in-images.pdf
 
 **Based sources code**
+
 This repo was built using several materials as below.
 
 Keras RetinaNet: https://github.com/fizyr/keras-retinanet
