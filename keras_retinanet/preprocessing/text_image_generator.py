@@ -13,7 +13,6 @@ from collections import OrderedDict
 class TextImageGenerator(Generator):
 	""" Online text image generator for text detection.
 	"""
-
 	def __init__(
 		self,
 		monogram_file, 
