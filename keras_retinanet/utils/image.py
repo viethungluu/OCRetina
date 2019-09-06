@@ -18,15 +18,8 @@ from __future__ import division
 import numpy as np
 import cv2
 from PIL import Image
-import tifffile as tiff
 
 from .transform import change_transform_origin
-
-def read_image(path):
-    image     = tiff.imread(path)
-    image     = np.expand_dims(image, axis=2)
-    image     = np.repeat(image, 3, axis=2)
-    return image[:, :, ::-1].copy()
 
 def read_image_bgr(path):
     """ Read an image in BGR format.
