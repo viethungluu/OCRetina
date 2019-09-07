@@ -33,22 +33,23 @@ from ..utils.image import (
     preprocess_image,
     resize_image,
 )
+from ..utils.paint_text import paint_text
 from ..utils.transform import transform_aabb
 
 
-class Generator(keras.utils.Sequence):
+class TextGenerator(keras.utils.Sequence):
     """ Abstract generator class.
     """
 
     def __init__(
         self,
+        monogram_file,
+        paint_func=paint_text,
         transform_generator = None,
         visual_effect_generator=None,
         batch_size=1,
-        group_method='ratio',  # one of 'none', 'random', 'ratio'
-        shuffle_groups=True,
-        image_min_side=800,
-        image_max_side=1333,
+        image_width=800,
+        image_height=1333,
         transform_parameters=None,
         compute_anchor_targets=anchor_targets_bbox,
         compute_shapes=guess_shapes,
@@ -60,7 +61,6 @@ class Generator(keras.utils.Sequence):
         Args
             transform_generator    : A generator used to randomly transform images and annotations.
             batch_size             : The size of the batches to generate.
-            group_method           : Determines how images are grouped together (defaults to 'ratio', one of ('none', 'random', 'ratio')).
             shuffle_groups         : If True, shuffles the groups each epoch.
             image_min_side         : After resizing the minimum side of an image is equal to image_min_side.
             image_max_side         : If after resizing the maximum side is larger than image_max_side, scales down further so that the max side is equal to image_max_side.
@@ -69,10 +69,11 @@ class Generator(keras.utils.Sequence):
             compute_shapes         : Function handler for computing the shapes of the pyramid for a given input.
             preprocess_image       : Function handler for preprocessing an image (scaling / normalizing) for passing through a network.
         """
+        self.monogram_file  = monogram_file
+
         self.transform_generator    = transform_generator
         self.visual_effect_generator = visual_effect_generator
         self.batch_size             = int(batch_size)
-        self.group_method           = group_method
         self.shuffle_groups         = shuffle_groups
         self.image_min_side         = image_min_side
         self.image_max_side         = image_max_side
@@ -89,10 +90,20 @@ class Generator(keras.utils.Sequence):
         if self.shuffle_groups:
             self.on_epoch_end()
 
+    def group_images(self):
+        """ Order the images according to self.order and makes groups of self.batch_size.
+        """
+        # determine the order of the images
+        order = list(range(self.size()))
+        random.shuffle(order)
+        # divide into groups, one group = one batch
+        self.groups = [[order[x % len(order)] for x in range(i, i + self.batch_size)] for i in range(0, len(order), self.batch_size)]
+
     def on_epoch_end(self):
         if self.shuffle_groups:
             random.shuffle(self.groups)
 
+    # -----------------------------------------
     def size(self):
         """ Size of the dataset.
         """
@@ -138,16 +149,23 @@ class Generator(keras.utils.Sequence):
         """
         raise NotImplementedError('load_annotations method not implemented')
 
-    def load_annotations_group(self, group):
-        """ Load annotations for all images in group.
+    def load_data(self, image_index):
+        """ Load image and annotations for an image_index.
         """
-        annotations_group = [self.load_annotations(image_index) for image_index in group]
+        raise NotImplementedError('load_data method not implemented')
+
+    # --------------------------------------------
+    def load_data_group(self, group):
+        """ Load image and annotations for all data in group.
+        """
+        result = [self.load_data(image_index) for image_index in group]
+        
+        image_group, annotations_group = zip(*result)
         for annotations in annotations_group:
             assert(isinstance(annotations, dict)), '\'load_annotations\' should return a list of dictionaries, received: {}'.format(type(annotations))
             assert('labels' in annotations), '\'load_annotations\' should return a list of dictionaries that contain \'labels\' and \'bboxes\'.'
             assert('bboxes' in annotations), '\'load_annotations\' should return a list of dictionaries that contain \'labels\' and \'bboxes\'.'
-
-        return annotations_group
+        return image_group, annotations_group
 
     def filter_annotations(self, image_group, annotations_group, group):
         """ Filter annotations by removing those that are outside of the image bounds or whose width/height < 0.
@@ -175,12 +193,6 @@ class Generator(keras.utils.Sequence):
                     annotations_group[index][k] = np.delete(annotations[k], invalid_indices, axis=0)
 
         return image_group, annotations_group
-
-    def load_image_group(self, group):
-        """ Load images for all images in a group.
-        """
-        result = [self.load_image(image_index) for image_index in group]
-        return zip(*result)
 
     def random_visual_effect_group_entry(self, image, annotations):
         """ Randomly transforms image and annotation.
@@ -270,20 +282,7 @@ class Generator(keras.utils.Sequence):
 
         return image_group, annotations_group
 
-    def group_images(self):
-        """ Order the images according to self.order and makes groups of self.batch_size.
-        """
-        # determine the order of the images
-        order = list(range(self.size()))
-        if self.group_method == 'random':
-            random.shuffle(order)
-        elif self.group_method == 'ratio':
-            order.sort(key=lambda x: self.image_aspect_ratio(x))
-
-        # divide into groups, one group = one batch
-        self.groups = [[order[x % len(order)] for x in range(i, i + self.batch_size)] for i in range(0, len(order), self.batch_size)]
-
-    def compute_inputs(self, image_group, lam_group, num_anchors):
+    def compute_inputs(self, image_group, num_anchors):
         """ Compute inputs for the network using an image_group.
         """
         # get the max image shape
@@ -291,17 +290,15 @@ class Generator(keras.utils.Sequence):
 
         # construct an image batch object
         image_batch = np.zeros((self.batch_size,) + max_shape, dtype=keras.backend.floatx())
-        lam_batch   = np.zeros((self.batch_size, num_anchors, 1), dtype=keras.backend.floatx())
 
         # copy all images to the upper left part of the image batch object
-        for image_index, (image, lam) in enumerate(zip(image_group, lam_group)):
+        for image_index, image in enumerate(image_group):
             image_batch[image_index, :image.shape[0], :image.shape[1], :image.shape[2]] = image
-            lam_batch[image_index, :, 0] = lam
 
         if keras.backend.image_data_format() == 'channels_first':
             image_batch = image_batch.transpose((0, 3, 1, 2))
 
-        return [image_batch, lam_batch]
+        return image_batch
 
     def generate_anchors(self, image_shape):
         anchor_params = None
@@ -329,10 +326,8 @@ class Generator(keras.utils.Sequence):
         """ Compute inputs and target outputs for the network.
         """
         # load images and annotations
-        image_group, lam_group  = self.load_image_group(group)
-        image_group, lam_group  = list(image_group), list(lam_group)
-
-        annotations_group       = self.load_annotations_group(group)
+        image_group, annotations_group  = self.load_data_group(group)
+        image_group, annotations_group  = list(image_group), list(annotations_group)
 
         # check validity of annotations
         image_group, annotations_group = self.filter_annotations(image_group, annotations_group, group)
@@ -350,7 +345,7 @@ class Generator(keras.utils.Sequence):
         targets = self.compute_targets(image_group, annotations_group)
 
         # compute network inputs
-        inputs  = self.compute_inputs(image_group, lam_group, targets[0].shape[1])
+        inputs  = self.compute_inputs(image_group, targets[0].shape[1])
 
         return inputs, targets
 
@@ -358,7 +353,6 @@ class Generator(keras.utils.Sequence):
         """
         Number of batches for generator.
         """
-
         return len(self.groups)
 
     def __getitem__(self, index):
