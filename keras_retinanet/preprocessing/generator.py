@@ -44,10 +44,11 @@ class TextGenerator(keras.utils.Sequence):
     def __init__(
         self,
         monogram_file,
+        num_images=16000,
         paint_func=paint_text,
         transform_generator = None,
         visual_effect_generator=None,
-        batch_size=1,
+        batch_size=4,
         image_width=800,
         image_height=1333,
         transform_parameters=None,
@@ -69,26 +70,37 @@ class TextGenerator(keras.utils.Sequence):
             compute_shapes         : Function handler for computing the shapes of the pyramid for a given input.
             preprocess_image       : Function handler for preprocessing an image (scaling / normalizing) for passing through a network.
         """
-        self.monogram_file  = monogram_file
+        self.paint_func     = paint_func
+        self.image_width    = image_width
+        self.image_height   = image_height
+        self.num_images     = num_images
 
-        self.transform_generator    = transform_generator
+        self.transform_generator     = transform_generator
         self.visual_effect_generator = visual_effect_generator
-        self.batch_size             = int(batch_size)
-        self.shuffle_groups         = shuffle_groups
-        self.image_min_side         = image_min_side
-        self.image_max_side         = image_max_side
-        self.transform_parameters   = transform_parameters or TransformParameters()
-        self.compute_anchor_targets = compute_anchor_targets
-        self.compute_shapes         = compute_shapes
-        self.preprocess_image       = preprocess_image
-        self.config                 = config
+        self.batch_size              = int(batch_size)
+        self.shuffle_groups          = shuffle_groups
+        self.image_min_side          = image_min_side
+        self.image_max_side          = image_max_side
+        self.transform_parameters    = transform_parameters or TransformParameters()
+        self.compute_anchor_targets  = compute_anchor_targets
+        self.compute_shapes          = compute_shapes
+        self.preprocess_image        = preprocess_image
+        self.config                  = config
+
+        self.word_list               = self.read_word_list(monogram_file)
+        print("Number of words", len(self.word_list))
 
         # Define groups
         self.group_images()
 
-        # Shuffle when initializing
-        if self.shuffle_groups:
-            self.on_epoch_end()
+    def read_word_list(self, text_file):
+        # monogram file is sorted by frequency in english speech
+        word_list = []
+        with codecs.open(text_file, mode='r', encoding='utf-8') as f:
+            for line in f:
+                word = line.strip()
+                word_list.append(word)
+        return word_list
 
     def group_images(self):
         """ Order the images according to self.order and makes groups of self.batch_size.
@@ -100,66 +112,44 @@ class TextGenerator(keras.utils.Sequence):
         self.groups = [[order[x % len(order)] for x in range(i, i + self.batch_size)] for i in range(0, len(order), self.batch_size)]
 
     def on_epoch_end(self):
-        if self.shuffle_groups:
-            random.shuffle(self.groups)
+        """ Shuffle the dataset
+        """
+        random.shuffle(self.groups)
 
     # -----------------------------------------
     def size(self):
         """ Size of the dataset.
         """
-        raise NotImplementedError('size method not implemented')
-
-    def num_classes(self):
-        """ Number of classes in the dataset.
-        """
-        raise NotImplementedError('num_classes method not implemented')
-
-    def has_label(self, label):
-        """ Returns True if label is a known label.
-        """
-        raise NotImplementedError('has_label method not implemented')
-
-    def has_name(self, name):
-        """ Returns True if name is a known class.
-        """
-        raise NotImplementedError('has_name method not implemented')
-
-    def name_to_label(self, name):
-        """ Map name to label.
-        """
-        raise NotImplementedError('name_to_label method not implemented')
-
-    def label_to_name(self, label):
-        """ Map label to name.
-        """
-        raise NotImplementedError('label_to_name method not implemented')
+        return self.num_images
 
     def image_aspect_ratio(self, image_index):
         """ Compute the aspect ratio for an image with image_index.
         """
-        raise NotImplementedError('image_aspect_ratio method not implemented')
+        return float(self.image_width) / self.image_height
 
     def load_image(self, image_index):
         """ Load an image at the image_index.
         """
-        raise NotImplementedError('load_image method not implemented')
+        pass
 
     def load_annotations(self, image_index):
         """ Load annotations for an image_index.
         """
-        raise NotImplementedError('load_annotations method not implemented')
+        pass
 
     def load_data(self, image_index):
         """ Load image and annotations for an image_index.
         """
-        raise NotImplementedError('load_data method not implemented')
+        if keras.backend.image_data_format() == 'channels_first':
+            pass
+
+        pass
 
     # --------------------------------------------
     def load_data_group(self, group):
         """ Load image and annotations for all data in group.
         """
         result = [self.load_data(image_index) for image_index in group]
-        
         image_group, annotations_group = zip(*result)
         for annotations in annotations_group:
             assert(isinstance(annotations, dict)), '\'load_annotations\' should return a list of dictionaries, received: {}'.format(type(annotations))
