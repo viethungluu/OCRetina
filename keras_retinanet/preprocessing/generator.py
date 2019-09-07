@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 import numpy as np
-import random
 import warnings
 
 import keras
@@ -36,6 +35,7 @@ from ..utils.image import (
 from ..utils.paint_text import paint_text
 from ..utils.transform import transform_aabb
 
+SEED_NUMBER = 28
 
 class TextGenerator(keras.utils.Sequence):
     """ Abstract generator class.
@@ -46,6 +46,7 @@ class TextGenerator(keras.utils.Sequence):
         monogram_file,
         num_images=16000,
         paint_func=paint_text,
+        max_string_len=150,
         transform_generator = None,
         visual_effect_generator=None,
         batch_size=4,
@@ -55,7 +56,8 @@ class TextGenerator(keras.utils.Sequence):
         compute_anchor_targets=anchor_targets_bbox,
         compute_shapes=guess_shapes,
         preprocess_image=preprocess_image,
-        config=None
+        config=None,
+        stage="train"
     ):
         """ Initialize Generator object.
 
@@ -74,6 +76,7 @@ class TextGenerator(keras.utils.Sequence):
         self.image_width    = image_width
         self.image_height   = image_height
         self.num_images     = num_images
+        self.max_string_len = max_string_len
 
         self.transform_generator     = transform_generator
         self.visual_effect_generator = visual_effect_generator
@@ -86,6 +89,7 @@ class TextGenerator(keras.utils.Sequence):
         self.compute_shapes          = compute_shapes
         self.preprocess_image        = preprocess_image
         self.config                  = config
+        self.stage                   = stage
 
         self.word_list               = self.read_word_list(monogram_file)
         print("Number of words", len(self.word_list))
@@ -100,7 +104,7 @@ class TextGenerator(keras.utils.Sequence):
             for line in f:
                 word = line.strip()
                 word_list.append(word)
-        return word_list
+        return np.array(word_list)
 
     def group_images(self):
         """ Order the images according to self.order and makes groups of self.batch_size.
@@ -130,20 +134,27 @@ class TextGenerator(keras.utils.Sequence):
     def load_image(self, image_index):
         """ Load an image at the image_index.
         """
-        pass
+        image, _ = self.load_data(image_index)
+        return image
 
     def load_annotations(self, image_index):
         """ Load annotations for an image_index.
         """
-        pass
+        _, annotation = self.load_data(image_index)
+        return annotation
 
     def load_data(self, image_index):
         """ Load image and annotations for an image_index.
         """
-        if keras.backend.image_data_format() == 'channels_first':
-            pass
+        # if validation generator
+        # set seed number to fix the text for image_index
+        if self.stage == "val":
+            np.random.seed(image_index)
+        words_to_image = np.random.choice(self.word_list, size=random.randint(self.max_string_len // 2, self.max_string_len))
 
-        pass
+        image, annotation = self.paint_func(words_to_image, image_width=self.image_width, image_height=self.image_height)
+        
+        return image, annotation
 
     # --------------------------------------------
     def load_data_group(self, group):
