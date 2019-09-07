@@ -47,6 +47,7 @@ class TextGenerator(keras.utils.Sequence):
         num_images=16000,
         paint_func=paint_text,
         max_string_len=150,
+        max_word_len=16,
         transform_generator = None,
         visual_effect_generator=None,
         batch_size=4,
@@ -152,7 +153,10 @@ class TextGenerator(keras.utils.Sequence):
             np.random.seed(image_index)
         words_to_image = np.random.choice(self.word_list, size=random.randint(self.max_string_len // 2, self.max_string_len))
 
-        image, annotation = self.paint_func(words_to_image, image_width=self.image_width, image_height=self.image_height)
+        image, annotation = self.paint_func(words_to_image, 
+                                    image_width=self.image_width, 
+                                    image_height=self.image_height
+                                    max_word_len=self.max_word_len)
         
         return image, annotation
 
@@ -318,7 +322,7 @@ class TextGenerator(keras.utils.Sequence):
             anchors,
             image_group,
             annotations_group,
-            self.num_classes()
+            self.max_word_len
         )
 
         return list(batches)

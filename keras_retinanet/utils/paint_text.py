@@ -15,11 +15,21 @@ if __name__ == "__main__" and __package__ is None:
 from .. import params
 
 # Translation of characters to unique integer values
-def text_to_labels(text):
-	ret = []
-	for char in text:
-		ret.append(params.ALPHABET.find(char))
+def text_to_labels(text, max_word_len):
+	ret = np.full(max_word_len, -1)
+	for i, char in enumerate(text):
+		ret[i] = params.ALPHABET.find(char)
 	return ret
+
+# Reverse translation of numerical classes back to characters
+def labels_to_text(labels):
+	ret = []
+	for c in labels:
+		if c == len(params.ALPHABET):  # CTC Blank
+			ret.append("")
+		else:
+			ret.append(params.ALPHABET[c])
+	return "".join(ret)
 
 """
 Source: https://github.com/keras-team/keras/blob/master/examples/image_ocr.py
@@ -50,8 +60,8 @@ def add_punctuation_and_space(paragraph):
 	
 	return paragraph
 
-def paint_text(paragraph, image_width, image_height, font_scale=1, thickness=2, line_spacing=40, multi_fonts=False):
-	annotations = {'labels': np.empty((0,)), 'bboxes': np.empty((0, 4))}
+def paint_text(paragraph, image_width, image_height, max_word_len, font_scale=1, thickness=2, line_spacing=40, multi_fonts=False):
+	annotations = {'labels': np.full((0, max_word_len), -1), 'bboxes': np.empty((0, 4))}
 
 	# define a blank image
 	image 		= np.full((image_height, image_width, 3), 255, dtype=np.uint8)
@@ -85,7 +95,7 @@ def paint_text(paragraph, image_width, image_height, font_scale=1, thickness=2, 
 		cv2.putText(image, word, (x, y), font_face, font_scale, (0, 0, 0), thickness)
 		
 		# calculate the bounding box corner of drawn word
-		annotations['labels'] = np.concatenate((annotations['labels'], [text_to_labels(word)]))
+		annotations['labels'] = np.concatenate((annotations['labels'], [text_to_labels(word, max_word_len)]))
 		annotations['bboxes'] = np.concatenate((annotations['bboxes'], [[
 			float(x),
 			float(y - h),
@@ -107,10 +117,13 @@ if __name__ == '__main__':
 	
 	text_phrase 	= np.array(test_phrase)
 
-	image, annotations 	= paint_text(test_phrase, 800, 1333)
+	image, annotations 	= paint_text(test_phrase, 800, 1333, 16)
 
-	for (x1, y1, x2, y2) in annotations['bboxes']:
-		cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 1)
+	for label, (x1, y1, x2, y2) in zip(annotations['labels'], annotations['bboxes']):
+		word = labels_to_text(label)
+
+		cv2.putText(image, word, (int(x1), int(y1)), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 0), 1)
+		cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 1)
 
 	cv2.imshow('image', image)
 	cv2.waitKey(0)

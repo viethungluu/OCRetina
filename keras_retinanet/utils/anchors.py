@@ -54,7 +54,7 @@ def anchor_targets_bbox(
     anchors,
     image_group,
     annotations_group,
-    num_classes,
+    max_word_length,
     negative_overlap=0.4,
     positive_overlap=0.5
 ):
@@ -64,7 +64,7 @@ def anchor_targets_bbox(
         anchors: np.array of annotations of shape (N, 4) for (x1, y1, x2, y2).
         image_group: List of BGR images.
         annotations_group: List of annotations (np.array of shape (N, 5) for (x1, y1, x2, y2, label)).
-        num_classes: Number of classes to predict.
+        max_word_length: Maximum word length.
         mask_shape: If the image is padded with zeros, mask_shape can be used to mark the relevant part of the image.
         negative_overlap: IoU overlap for negative anchors (all anchors with overlap < negative_overlap are negative).
         positive_overlap: IoU overlap or positive anchors (all anchors with overlap > positive_overlap are positive).
@@ -86,7 +86,7 @@ def anchor_targets_bbox(
     batch_size = len(image_group)
 
     regression_batch  = np.zeros((batch_size, anchors.shape[0], 4 + 1), dtype=keras.backend.floatx())
-    labels_batch      = np.zeros((batch_size, anchors.shape[0], num_classes + 1), dtype=keras.backend.floatx())
+    labels_batch      = np.zeros((batch_size, anchors.shape[0], max_word_length + 1), dtype=keras.backend.floatx())
 
     # compute labels and regression targets
     for index, (image, annotations) in enumerate(zip(image_group, annotations_group)):
