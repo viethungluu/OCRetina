@@ -79,6 +79,7 @@ class TextGenerator(keras.utils.Sequence):
         self.image_height   = image_height
         self.num_images     = num_images
         self.max_string_len = max_string_len
+        self.max_word_len   = max_word_len
 
         self.transform_generator     = transform_generator
         self.visual_effect_generator = visual_effect_generator
