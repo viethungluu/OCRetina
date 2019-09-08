@@ -149,7 +149,7 @@ class TextGenerator(keras.utils.Sequence):
         # set seed number to fix the text for image_index
         if self.stage == "val":
             np.random.seed(image_index)
-        words_to_image = np.random.choice(self.word_list, size=random.randint(self.max_string_len // 2, self.max_string_len))
+        words_to_image = np.random.choice(self.word_list, size=np.random.randint(self.max_string_len // 2, self.max_string_len))
 
         image, annotation = self.paint_func(words_to_image, 
                                     image_width=self.image_width, 
