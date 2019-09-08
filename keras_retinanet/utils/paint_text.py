@@ -70,7 +70,7 @@ def paint_text(paragraph, image_width, image_height, max_word_len, font_scale=1,
 	annotations = {'labels': np.full((0, max_word_len + 1), -1), 'bboxes': np.empty((0, 4))}
 
 	# define a blank image
-	image 		= np.full((image_height, image_width, 3), 255, dtype=np.uint8)
+	image 		= np.full((image_height, image_width, 1), 255, dtype=np.uint8)
 
 	# set font face and font size
 	if multi_fonts:

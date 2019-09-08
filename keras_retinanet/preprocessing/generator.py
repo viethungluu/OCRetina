@@ -299,6 +299,8 @@ class TextGenerator(keras.utils.Sequence):
         for image_index, image in enumerate(image_group):
             image_batch[image_index, :image.shape[0], :image.shape[1], :image.shape[2]] = image
 
+        # convert image batch to Batch x Width x Height x Channel
+        image_batch = image_batch.transpose((0, 2, 1, 3))
         if keras.backend.image_data_format() == 'channels_first':
             image_batch = image_batch.transpose((0, 3, 1, 2))
 

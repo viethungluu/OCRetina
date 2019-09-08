@@ -108,9 +108,9 @@ def create_models(backbone_retinanet, max_word_length, weights,
         num_anchors   = anchor_params.num_anchors()
 
     if keras.backend.image_data_format() == 'channels_first':
-        inputs = keras.layers.Input(shape=(3, image_height, image_width))
+        inputs = keras.layers.Input(shape=(1, image_width, image_height))
     else:
-        inputs = keras.layers.Input(shape=(image_height, image_width, 3))
+        inputs = keras.layers.Input(shape=(image_width, image_height, 1))
 
     # Keras recommends initialising a multi-gpu model on the CPU to ease weight sharing, and to prevent OOM errors.
     # optionally wrap in a parallel model
