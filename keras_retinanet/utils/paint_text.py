@@ -16,9 +16,11 @@ from .. import params
 
 # Translation of characters to unique integer values
 def text_to_labels(text, max_word_len):
-	ret = np.full(max_word_len, -1)
+	ret = np.full(max_word_len + 1, -1)
 	for i, char in enumerate(text):
 		ret[i] = params.ALPHABET.find(char)
+	ret[-1] = i
+	
 	return ret
 
 # Reverse translation of numerical classes back to characters
@@ -61,7 +63,7 @@ def add_punctuation_and_space(paragraph):
 	return paragraph
 
 def paint_text(paragraph, image_width, image_height, max_word_len, font_scale=1, thickness=2, line_spacing=40, multi_fonts=False):
-	annotations = {'labels': np.full((0, max_word_len), -1), 'bboxes': np.empty((0, 4))}
+	annotations = {'labels': np.full((0, max_word_len + 1), -1), 'bboxes': np.empty((0, 4))}
 
 	# define a blank image
 	image 		= np.full((image_height, image_width, 3), 255, dtype=np.uint8)
@@ -120,7 +122,7 @@ if __name__ == '__main__':
 	image, annotations 	= paint_text(test_phrase, 800, 1333, 16)
 
 	for label, (x1, y1, x2, y2) in zip(annotations['labels'], annotations['bboxes']):
-		word = labels_to_text(label)
+		word = labels_to_text(label[:-1])
 
 		cv2.putText(image, word, (int(x1), int(y1)), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 0), 1)
 		cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 1)

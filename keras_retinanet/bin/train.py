@@ -26,8 +26,6 @@ import keras.preprocessing.image
 import tensorflow as tf
 from keras.callbacks import CSVLogger
 
-from functools import partial, update_wrapper
-
 # Allow relative imports when being executed as script.
 if __name__ == "__main__" and __package__ is None:
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -51,11 +49,6 @@ from ..utils.model import freeze as freeze_model
 from ..utils.transform import random_transform_generator
 from ..utils.image import random_visual_effect_generator
 
-def wrapped_partial(func, *args, **kwargs):
-    partial_func = partial(func, *args, **kwargs)
-    update_wrapper(partial_func, func)
-    return partial_func
-
 def makedirs(path):
     # Intended behavior: try to create the directory,
     # pass if the directory exists already, fails otherwise.
@@ -74,7 +67,6 @@ def get_session():
     config.gpu_options.allow_growth = True
     return tf.Session(config=config)
 
-
 def model_with_weights(model, weights, skip_mismatch):
     """ Load weights for model.
 
@@ -86,7 +78,6 @@ def model_with_weights(model, weights, skip_mismatch):
     if weights is not None:
         model.load_weights(weights, by_name=True, skip_mismatch=skip_mismatch)
     return model
-
 
 def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
                   freeze_backbone=False, lr=1e-5, config=None):
@@ -142,7 +133,6 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
 
     return model, training_model, prediction_model
 
-
 def create_callbacks(model, training_model, prediction_model, validation_generator, args):
     """ Creates the callbacks to use during training.
 
@@ -161,18 +151,6 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
     tensorboard_callback = None
 
     if args.logger_dir:
-        # tensorboard_callback = keras.callbacks.TensorBoard(
-        #     log_dir                = args.logger_dir,
-        #     histogram_freq         = 0,
-        #     batch_size             = args.batch_size,
-        #     write_graph            = True,
-        #     write_grads            = False,
-        #     write_images           = False,
-        #     embeddings_freq        = 0,
-        #     embeddings_layer_names = None,
-        #     embeddings_metadata    = None
-        # )
-        # callbacks.append(tensorboard_callback)
         makedirs(args.logger_dir)
         csv_logger = CSVLogger(os.path.join(args.logger_dir, 'train.csv'), append=True, separator=',')
         callbacks.append(csv_logger)
@@ -217,7 +195,6 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
     ))
 
     return callbacks
-
 
 def create_generators(args, preprocess_image):
     """ Create generators for training and validation.

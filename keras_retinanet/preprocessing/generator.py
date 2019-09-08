@@ -110,7 +110,7 @@ class TextGenerator(keras.utils.Sequence):
     def group_images(self):
         """ Order the images according to self.order and makes groups of self.batch_size.
         """
-        # determine the order of the images
+        # randomly determine the order of the images
         order = list(range(self.size()))
         random.shuffle(order)
         # divide into groups, one group = one batch
@@ -119,7 +119,7 @@ class TextGenerator(keras.utils.Sequence):
     def on_epoch_end(self):
         """ Shuffle the dataset
         """
-        random.shuffle(self.groups)
+        self.group_images()
 
     # -----------------------------------------
     def size(self):
