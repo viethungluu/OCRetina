@@ -155,7 +155,7 @@ class TextGenerator(keras.utils.Sequence):
 
         image, annotation = self.paint_func(words_to_image, 
                                     image_width=self.image_width, 
-                                    image_height=self.image_height
+                                    image_height=self.image_height,
                                     max_word_len=self.max_word_len)
         
         return image, annotation
