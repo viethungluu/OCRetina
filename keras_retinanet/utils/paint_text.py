@@ -16,6 +16,8 @@ from .. import params
 
 # Translation of characters to unique integer values
 def text_to_labels(text, max_word_len):
+	text = text[:4]
+
 	ret = np.full(max_word_len + 2, -1)
 	for i, char in enumerate(text):
 		ret[i] = params.ALPHABET.find(char)
