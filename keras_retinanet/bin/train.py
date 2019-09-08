@@ -80,7 +80,8 @@ def model_with_weights(model, weights, skip_mismatch):
     return model
 
 def create_models(backbone_retinanet, max_word_length, weights, multi_gpu=0,
-                  freeze_backbone=False, lr=1e-5, config=None):
+                  freeze_backbone=False, lr=1e-5, config=None,
+                  image_width, image_height):
     """ Creates three models (model, training_model, prediction_model).
 
     Args
@@ -106,15 +107,20 @@ def create_models(backbone_retinanet, max_word_length, weights, multi_gpu=0,
         anchor_params = parse_anchor_parameters(config)
         num_anchors   = anchor_params.num_anchors()
 
+    if keras.backend.image_data_format() == 'channels_first':
+        inputs = keras.layers.Input(shape=(3, image_width, image_height))
+    else:
+        inputs = keras.layers.Input(shape=(image_width, image_height, 3))
+
     # Keras recommends initialising a multi-gpu model on the CPU to ease weight sharing, and to prevent OOM errors.
     # optionally wrap in a parallel model
     if multi_gpu > 1:
         from keras.utils import multi_gpu_model
         with tf.device('/cpu:0'):
-            model = model_with_weights(backbone_retinanet(max_word_length, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
+            model = model_with_weights(backbone_retinanet(max_word_length, inputs=inputs, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
         training_model = multi_gpu_model(model, gpus=multi_gpu)
     else:
-        model          = model_with_weights(backbone_retinanet(max_word_length, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
+        model          = model_with_weights(backbone_retinanet(max_word_length, inputs=inputs, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
         training_model = model
 
     # make prediction model
@@ -380,7 +386,9 @@ def main(args=None):
             multi_gpu=args.multi_gpu,
             freeze_backbone=args.freeze_backbone,
             lr=args.lr,
-            config=args.config
+            config=args.config,
+            image_width=args.image_width,
+            image_height=args.image_height
         )
 
     # print model summary
