@@ -27,8 +27,30 @@ def ctc():
         A functor that computes the CTC loss.
     """
     def _ctc(y_true, y_pred):
-        loss = keras.backend.ones_like(y_true)
-        return keras.backend.mean(loss)
+        labels         = y_true[:, :, :-3] # B x N x num_classes
+        anchor_state   = y_true[:, :, -1]  # B x N x 1 (-1 for ignore, 0 for background, 1 for object)
+        classification = y_pred # B x N x num_classes
+
+        # filter out "ignore" anchors
+        indices        = backend.where(keras.backend.not_equal(anchor_state, -1))
+        
+        labels         = backend.gather_nd(labels, indices)
+        classification = backend.gather_nd(classification, indices)
+
+        # compute the focal loss
+        alpha_factor = keras.backend.ones_like(labels) * alpha
+        alpha_factor = backend.where(keras.backend.equal(labels, 1), alpha_factor, 1 - alpha_factor)
+        focal_weight = backend.where(keras.backend.equal(labels, 1), 1 - classification, classification)
+        focal_weight = alpha_factor * focal_weight ** gamma
+
+        cls_loss     = focal_weight * keras.backend.binary_crossentropy(labels, classification)
+        
+        # compute the normalizer: the number of positive anchors
+        normalizer = backend.where(keras.backend.equal(anchor_state, 1))
+        normalizer = keras.backend.cast(keras.backend.shape(normalizer)[0], keras.backend.floatx())
+        normalizer = keras.backend.maximum(keras.backend.cast_to_floatx(1.0), normalizer)
+
+        return keras.backend.sum(cls_loss) / normalizer
 
     return _ctc
 

@@ -412,7 +412,7 @@ def main(args=None):
         workers=args.workers,
         use_multiprocessing=args.multiprocessing,
         max_queue_size=args.max_queue_size,
-        # validation_data=validation_generator
+        validation_data=validation_generator
     )
 
 
