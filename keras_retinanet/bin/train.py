@@ -39,7 +39,7 @@ from .. import models
 from ..callbacks import RedirectModel
 from ..callbacks.eval import Evaluate
 from ..models.retinanet import retinanet_bbox
-from ..preprocessing.generator import Generator
+from ..preprocessing.generator import TextGenerator
 from ..utils.anchors import make_shapes_callback
 from ..utils.config import read_config_file, parse_anchor_parameters
 from ..utils.keras_version import check_keras_version
@@ -233,18 +233,19 @@ def create_generators(args, preprocess_image):
         transform_generator = random_transform_generator(flip_x_chance=0.5)
         visual_effect_generator = None
 
-    train_generator = Generator(
+    train_generator = TextGenerator(
         args.monogram_path,
         transform_generator=transform_generator,
         visual_effect_generator=visual_effect_generator,
         **common_args
     )
 
-    validation_generator = Generator(
-        args.monogram_path,
-        shuffle_groups=False,
-        **common_args
-    )
+    # validation_generator = TextGenerator(
+    #     args.monogram_path,
+    #     shuffle_groups=False,
+    #     **common_args
+    # )
+    validation_generator = None
 
     return train_generator, validation_generator
 
