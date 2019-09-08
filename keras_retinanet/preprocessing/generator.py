@@ -16,6 +16,7 @@ limitations under the License.
 
 import numpy as np
 import warnings
+import codecs
 
 import keras
 
@@ -254,7 +255,7 @@ class TextGenerator(keras.utils.Sequence):
     def resize_image(self, image):
         """ Resize an image using image_min_side and image_max_side.
         """
-        return resize_image(image, min_side=self.image_min_side, max_side=self.image_max_side)
+        return resize_image(image, min_side=self.image_width, max_side=self.image_height)
 
     def preprocess_group_entry(self, image, annotations):
         """ Preprocess image and its annotations.
