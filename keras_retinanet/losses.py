@@ -17,7 +17,7 @@ limitations under the License.
 import keras
 from . import backend
 
-def ctc():
+def ctc(alpha=0.25, gamma=2.0):
     """ Create a functor for computing the CTC loss.
 
     Args
