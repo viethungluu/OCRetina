@@ -36,6 +36,8 @@ if __name__ == "__main__" and __package__ is None:
 from .. import layers  # noqa: F401
 from .. import losses
 from .. import models
+from .. import params
+
 from ..callbacks import RedirectModel
 from ..callbacks.eval import Evaluate
 from ..models.retinanet import retinanet_bbox
@@ -77,13 +79,13 @@ def model_with_weights(model, weights, skip_mismatch):
         model.load_weights(weights, by_name=True, skip_mismatch=skip_mismatch)
     return model
 
-def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
+def create_models(backbone_retinanet, max_word_length, weights, multi_gpu=0,
                   freeze_backbone=False, lr=1e-5, config=None):
     """ Creates three models (model, training_model, prediction_model).
 
     Args
         backbone_retinanet : A function to call to create a retinanet model with a given backbone.
-        num_classes        : The number of classes to train.
+        max_word_length    : Max word length to detect.
         weights            : The weights to load into the model.
         multi_gpu          : The number of GPUs to use for training.
         freeze_backbone    : If True, disables learning for the backbone.
@@ -296,6 +298,7 @@ def parse_args(args):
     group.add_argument('--no-weights',        help='Don\'t initialize the model with any weights.', dest='imagenet_weights', action='store_const', const=False)
 
     parser.add_argument('--monogram-path',    help='Path to file containing monogram words for training')
+    parser.add_argument('--max-word-length',  help='Maximum length of a word.', type=int, default=16)
 
     parser.add_argument('--backbone',         help='Backbone model used by retinanet.', default='resnet50', type=str)
     parser.add_argument('--batch-size',       help='Size of the batches.', default=1, type=int)
@@ -373,7 +376,7 @@ def main(args=None):
         print('Creating model, this may take a second...')
         model, training_model, prediction_model = create_models(
             backbone_retinanet=backbone.retinanet,
-            num_classes=train_generator.num_classes(),
+            max_word_length=args.max_word_length,
             weights=weights,
             multi_gpu=args.multi_gpu,
             freeze_backbone=args.freeze_backbone,

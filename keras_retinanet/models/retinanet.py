@@ -22,7 +22,7 @@ from . import assert_training_model
 
 
 def default_classification_model(
-    num_classes,
+    max_word_length,
     num_anchors,
     pyramid_feature_size=256,
     prior_probability=0.01,
@@ -32,7 +32,7 @@ def default_classification_model(
     """ Creates the default classification submodel.
 
     Args
-        num_classes                 : Number of classes to predict a score for at each feature level.
+        max_word_length             : Max word length to detect.
         num_anchors                 : Number of anchors to predict classification scores for at each feature level.
         pyramid_feature_size        : The number of filters to expect from the feature pyramid levels.
         classification_feature_size : The number of filters to use in the layers in the classification submodel.
@@ -64,7 +64,7 @@ def default_classification_model(
         )(outputs)
 
     outputs = keras.layers.Conv2D(
-        filters=num_classes * num_anchors,
+        filters=max_word_length * num_anchors,
         kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
         bias_initializer=initializers.PriorProbability(probability=prior_probability),
         name='pyramid_classification',
@@ -74,7 +74,7 @@ def default_classification_model(
     # reshape output and apply sigmoid
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute')(outputs)
-    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape')(outputs)
+    outputs = keras.layers.Reshape((-1, max_word_length), name='pyramid_classification_reshape')(outputs)
     outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid')(outputs)
 
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
@@ -247,7 +247,7 @@ def __build_anchors(anchor_parameters, features):
 def retinanet(
     inputs,
     backbone_layers,
-    num_classes,
+    max_word_length,
     num_anchors             = None,
     create_pyramid_features = __create_pyramid_features,
     submodels               = None,
@@ -259,7 +259,7 @@ def retinanet(
 
     Args
         inputs                  : keras.layers.Input (or list of) for the input to the model.
-        num_classes             : Number of classes to classify.
+        max_word_length         : Max word length to detect.
         num_anchors             : Number of base anchors.
         create_pyramid_features : Functor for creating pyramid features given the features C3, C4, C5 from the backbone.
         submodels               : Submodels to run on each feature map (default is regression and classification submodels).
@@ -280,7 +280,7 @@ def retinanet(
         num_anchors = AnchorParameters.default.num_anchors()
 
     if submodels is None:
-        submodels = default_submodels(num_classes, num_anchors)
+        submodels = default_submodels(max_word_length, num_anchors)
 
     C3, C4, C5 = backbone_layers
 
