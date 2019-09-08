@@ -87,7 +87,7 @@ def anchor_targets_bbox(
 
     # labels_batch contain y_true (4), anchor_stage(1)
     regression_batch  = np.zeros((batch_size, anchors.shape[0], 4 + 1), dtype=keras.backend.floatx())
-    # labels_batch contain y_true (max_word_length), input_length (1), label_length (1), anchor_stage(1)
+    # labels_batch contain y_true (max_word_length), label_length (1), anchor_stage(1)
     labels_batch      = np.zeros((batch_size, anchors.shape[0], max_word_length + 2), dtype=keras.backend.floatx())
 
     # compute labels and regression targets

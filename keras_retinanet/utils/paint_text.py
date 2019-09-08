@@ -23,7 +23,7 @@ def text_to_labels(text, max_word_len):
 	for i, char in enumerate(text):
 		ret[i] = params.ALPHABET.find(char)
 	
-	ret[-2] = i
+	ret[-1] = i
 	
 	return ret
 
