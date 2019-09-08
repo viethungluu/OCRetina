@@ -57,6 +57,7 @@ def makedirs(path):
         if not os.path.isdir(path):
             raise
 
+
 def get_session():
     """ Construct a modified tf session.
     """
