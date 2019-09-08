@@ -110,7 +110,7 @@ class TextGenerator(keras.utils.Sequence):
         """
         # randomly determine the order of the images
         order = list(range(self.size()))
-        random.shuffle(order)
+        np.random.shuffle(order)
         # divide into groups, one group = one batch
         self.groups = [[order[x % len(order)] for x in range(i, i + self.batch_size)] for i in range(0, len(order), self.batch_size)]
 
