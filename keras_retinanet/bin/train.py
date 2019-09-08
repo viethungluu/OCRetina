@@ -39,9 +39,7 @@ from .. import models
 from ..callbacks import RedirectModel
 from ..callbacks.eval import Evaluate
 from ..models.retinanet import retinanet_bbox
-
-from ..preprocessing.text_generator import TextGenerator
-
+from ..preprocessing.generator import Generator
 from ..utils.anchors import make_shapes_callback
 from ..utils.config import read_config_file, parse_anchor_parameters
 from ..utils.keras_version import check_keras_version
@@ -58,7 +56,6 @@ def makedirs(path):
     except OSError:
         if not os.path.isdir(path):
             raise
-
 
 def get_session():
     """ Construct a modified tf session.
@@ -125,8 +122,8 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
     # compile model
     training_model.compile(
         loss={
-            'regression'    : wrapped_partial(losses.smooth_l1()),
-            'classification': wrapped_partial(losses.ctc())
+            'regression'    : losses.smooth_l1(),
+            'classification': losses.ctc()
         },
         optimizer=keras.optimizers.adam(lr=lr, clipnorm=0.001)
     )
@@ -235,14 +232,14 @@ def create_generators(args, preprocess_image):
         transform_generator = random_transform_generator(flip_x_chance=0.5)
         visual_effect_generator = None
 
-    train_generator = TextGenerator(
+    train_generator = Generator(
         args.monogram_path,
         transform_generator=transform_generator,
         visual_effect_generator=visual_effect_generator,
         **common_args
     )
 
-    validation_generator = TextGenerator(
+    validation_generator = Generator(
         args.monogram_path,
         shuffle_groups=False,
         **common_args

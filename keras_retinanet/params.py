@@ -7,3 +7,5 @@ FONT_LIST = [cv2.FONT_HERSHEY_SIMPLEX, cv2.FONT_HERSHEY_PLAIN, cv2.FONT_HERSHEY_
 PUNCTUATION_LIST = [".", ",", "!", "?"]
 
 ALPHABET = "abcdefghijklmnopqrstuvwxyz" + "".join(PUNCTUATION_LIST) + " "
+
+INPUT_LENGTH = 100

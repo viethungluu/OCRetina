@@ -27,7 +27,8 @@ def ctc():
         A functor that computes the CTC loss.
     """
     def _ctc(y_true, y_pred):
-        pass
+        loss = keras.backend.zeros_like(y_true)
+        return keras.backend.sum(loss)
 
     return _ctc
 
