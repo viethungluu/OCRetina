@@ -285,8 +285,6 @@ def parse_args(args):
     """ Parse the arguments.
     """
     parser     = argparse.ArgumentParser(description='Simple training script for training a RetinaNet network.')
-    subparsers = parser.add_subparsers(help='Arguments for specific dataset types.', dest='dataset_type')
-    subparsers.required = True
 
     def csv_list(string):
         return string.split(',')
