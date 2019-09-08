@@ -82,8 +82,6 @@ class TextGenerator(keras.utils.Sequence):
         self.transform_generator     = transform_generator
         self.visual_effect_generator = visual_effect_generator
         self.batch_size              = int(batch_size)
-        self.image_min_side          = image_min_side
-        self.image_max_side          = image_max_side
         self.transform_parameters    = transform_parameters or TransformParameters()
         self.compute_anchor_targets  = compute_anchor_targets
         self.compute_shapes          = compute_shapes
