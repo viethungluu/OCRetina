@@ -28,7 +28,7 @@ def ctc():
     """
     def _ctc(y_true, y_pred):
         loss = keras.backend.ones_like(y_true)
-        return keras.backend.sum(loss)
+        return keras.backend.mean(loss)
 
     return _ctc
 
