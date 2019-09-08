@@ -106,8 +106,6 @@ def create_models(backbone_retinanet, max_word_length, weights, multi_gpu=0,
         anchor_params = parse_anchor_parameters(config)
         num_anchors   = anchor_params.num_anchors()
 
-    weights_tensor = keras.layers.Input(shape=(None, 1))
-
     # Keras recommends initialising a multi-gpu model on the CPU to ease weight sharing, and to prevent OOM errors.
     # optionally wrap in a parallel model
     if multi_gpu > 1:
@@ -116,7 +114,7 @@ def create_models(backbone_retinanet, max_word_length, weights, multi_gpu=0,
             model = model_with_weights(backbone_retinanet(max_word_length, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
         training_model = multi_gpu_model(model, gpus=multi_gpu)
     else:
-        model          = model_with_weights(backbone_retinanet(max_word_length, lam_inputs=weights_tensor, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
+        model          = model_with_weights(backbone_retinanet(max_word_length, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
         training_model = model
 
     # make prediction model
