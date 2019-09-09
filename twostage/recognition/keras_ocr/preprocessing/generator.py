@@ -176,6 +176,8 @@ class TextGenerator(keras.utils.Sequence):
         # compute network inputs
         images  = self.compute_inputs(image_group)
 
+        print(images.shape, labels.shape, input_length.shape, label_length.shape)
+
         # dummy data for dummy loss function
         return [images, labels, input_length, label_length], np.zeros([self.batch_size])
 
