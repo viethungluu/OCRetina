@@ -167,7 +167,7 @@ def main(args=None):
 		epochs=args.epochs,
 		verbose=1,
 		callbacks=[checkpoint],
-		validation_data=validation_generator
+		validation_data=val_generator
 	)
 	
 
