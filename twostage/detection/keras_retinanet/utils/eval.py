@@ -102,11 +102,10 @@ def _get_detections(generator, model, score_threshold=0.05, max_detections=100, 
         image_detections = np.concatenate([image_boxes, np.expand_dims(image_scores, axis=1), np.expand_dims(image_labels, axis=1)], axis=1)
 
         if save_path is not None:
-            rgb_image = generator.load_rgb_image(i)
-            draw_annotations(rgb_image, generator.load_annotations(i), label_to_name=generator.label_to_name)
-            draw_detections(rgb_image, image_boxes, image_scores, image_labels, label_to_name=generator.label_to_name, score_threshold=score_threshold)
+            draw_annotations(raw_image, generator.load_annotations(i), label_to_name=generator.label_to_name)
+            draw_detections(raw_image, image_boxes, image_scores, image_labels, label_to_name=generator.label_to_name, score_threshold=score_threshold)
 
-            cv2.imwrite(os.path.join(save_path, '{}.png'.format(i)), rgb_image)
+            cv2.imwrite(os.path.join(save_path, '{}.png'.format(i)), raw_image)
 
         # copy detections to all_detections
         for label in range(generator.num_classes()):
