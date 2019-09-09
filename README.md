@@ -15,7 +15,7 @@ Two models are trained independently:
 Test results after 4 epochs
 ![Test results after 4 epochs](/images/detection.png)
 
-* A RNN based model is trained to recognize word-level text
+* A RNN based model is trained to recognize word-level text ([Google Colab Notebook for training recognition model](https://colab.research.google.com/drive/1fEPLZh888mu3NWrXaTYCKrCAfYmO-W-N))
 
 Note that both models are trained using text image generated from a same vocabulary file.
 
