@@ -2,17 +2,18 @@
 
 **THIS REPO IS UNDER DEVELOPMENT**
 
-End-to-end one-stage CNNs for text detection and recognition based on RetinaNet. 
+# Solutions
+This repo provide end-to-end CNNs for text detection and recognition based on RetinaNet. Currently, two solutions are proposed:
 
-# Two-stage OCR system
+## Two-stage OCR system
 
 Facebook's Rosetta system for text detection and recognition in images (source: Facebook \[3\])
 
 ![Facebook's Rosetta system for text detection and recognition in images (source: Facebook \[3\])](/images/rosetta.PNG)
 
-# Proposed one-stage OCR system
+## One-stage OCR system
 
-Proposed one-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)
+One-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)
 
 ![Proposed one-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)](/images/onestage.png)
 
