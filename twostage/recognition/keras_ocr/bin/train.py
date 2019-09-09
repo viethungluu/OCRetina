@@ -60,7 +60,7 @@ def parse_args(args):
 	parser.add_argument('--snapshot-path',    help='Path to store snapshots of models during training (defaults to \'./snapshots\')', default='./snapshots')
 	parser.add_argument('--image-width',   	  help='Rescale the image so the width is image-width.', type=int, default=128)
 
-	return check_args(parser.parse_args(args))
+	return parser.parse_args(args)
 
 def build_model(args):
 	conv_filters = 16
