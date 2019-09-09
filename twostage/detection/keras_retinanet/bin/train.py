@@ -229,16 +229,17 @@ def create_generators(args, preprocess_image):
 
     train_generator = TextGenerator(
         args.monogram_path,
+        num_images=4096,
         max_string_len=args.max_string_len,
         transform_generator=transform_generator,
         visual_effect_generator=visual_effect_generator,
-        seed_offset=1600,
+        seed_offset=256,
         **common_args
     )
 
     validation_generator = TextGenerator(
         args.monogram_path,
-        num_images=1600,
+        num_images=512,
         max_string_len=args.max_string_len,
         **common_args
     )
@@ -300,7 +301,6 @@ def parse_args(args):
     parser.add_argument('--multi-gpu',        help='Number of GPUs to use for parallel processing.', type=int, default=0)
     parser.add_argument('--multi-gpu-force',  help='Extra flag needed to enable (experimental) multi-gpu support.', action='store_true')
     parser.add_argument('--epochs',           help='Number of epochs to train.', type=int, default=50)
-    parser.add_argument('--steps',            help='Number of steps per epoch.', type=int, default=10000)
     parser.add_argument('--lr',               help='Learning rate.', type=float, default=1e-5)
 
     parser.add_argument('--snapshot-path',    help='Path to store snapshots of models during training (defaults to \'./snapshots\')', default='./snapshots')
@@ -400,7 +400,7 @@ def main(args=None):
     # start training
     return training_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=args.steps,
+        steps_per_epoch=len(train_generator) // args.batch_size,
         initial_epoch=initial_epoch,
         epochs=args.epochs,
         verbose=1,

@@ -47,7 +47,7 @@ class TextGenerator(keras.utils.Sequence):
     def __init__(
         self,
         monogram_file,
-        num_images=16000,
+        num_images=1024,
         paint_func=paint_text,
         max_string_len=150,
         group_method='ratio',  # one of 'none', 'random', 'ratio'
