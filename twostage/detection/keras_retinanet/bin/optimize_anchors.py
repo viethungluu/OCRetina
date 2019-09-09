@@ -165,13 +165,8 @@ if __name__ == "__main__":
     for i in range(4096):
         img, annotations = load_data(word_list, i)
         for anno in annotations['bboxes']:
-            x1, y1, x2, y2 = list(map(lambda x: int(x), anno))
-
-            if not x1 or not y1 or not x2 or not y2:
-                continue
-
             scale = compute_resize_scale(img.shape, min_side=args.image_min_side, max_side=args.image_max_side)
-            x1, y1, x2, y2 = list(map(lambda x: int(x) * scale, row[1:5]))
+            x1, y1, x2, y2 = list(map(lambda x: int(x) * scale, anno))
 
             max_x = max(x2, max_x)
             max_y = max(y2, max_y)
