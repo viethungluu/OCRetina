@@ -187,7 +187,7 @@ def resize_image(img, image_width=800):
         A resized image.
     """
     # compute scale to resize the image
-    scale = float(image_width) / image.shape[1]
+    scale = float(image_width) / img.shape[1]
 
     # resize the image with the computed scale
     img = cv2.resize(img, None, fx=scale, fy=scale)
