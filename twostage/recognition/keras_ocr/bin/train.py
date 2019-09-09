@@ -148,7 +148,7 @@ def main(args=None):
 	checkpoint = keras.callbacks.ModelCheckpoint(
 		os.path.join(
 			args.snapshot_path,
-			'{{epoch:02d}}.h5'
+			'recognition_{{epoch:02d}}.h5'
 		),
 		verbose=1,
 	)
