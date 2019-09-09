@@ -29,3 +29,21 @@ def preprocess_image(x, mode='caffe'):
         x[..., 2] -= 123.68
 
     return x
+
+def resize_image(img, image_width=128):
+    """ Resize an image such that the width is constrained to image_width.
+
+    Args
+        img: The image
+        image_width: image width adter resized
+
+    Returns
+        A resized image.
+    """
+    # compute scale to resize the image
+    scale = image_width / img.shape[1]
+
+    # resize the image with the computed scale
+    img = cv2.resize(img, None, fx=scale, fy=scale)
+
+    return img
