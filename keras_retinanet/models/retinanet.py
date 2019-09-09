@@ -72,7 +72,10 @@ def default_classification_model(
     outputs = keras.layers.Permute((2, 1, 3))(outputs)
 
     # reshape data to feed to RNN
-    outputs = keras.layers.Lambda(squeeze_last2dims_operator, output_shape=squeeze_last2dims_shape)(outputs)
+    # outputs = keras.layers.Lambda(squeeze_last2dims_operator, output_shape=squeeze_last2dims_shape)(outputs)
+    x_shape = tf.shape(outputs)
+    outputs = tf.reshape(outputs, [x_shape[0], x_shape[1], tf.reduce_prod(x_shape[2:])])
+
 
     # cuts down input size going into RNN:
     outputs = Dense(params.TIME_DENSE_SIZE, activation=act, name='dense1')(outputs)
