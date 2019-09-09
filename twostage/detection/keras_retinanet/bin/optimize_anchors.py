@@ -22,8 +22,8 @@ from ..utils.paint_text import paint_text
 
 warnings.simplefilter("ignore")
 
-SIZES = [32, 64, 128, 256, 512]
-STRIDES = [8, 16, 32, 64, 128]
+SIZES = [16, 32, 64, 128, 256]
+STRIDES = [4, 8, 16, 32, 64]
 state = {'best_result': sys.maxsize}
 
 def read_word_list(text_file):
