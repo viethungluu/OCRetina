@@ -15,10 +15,10 @@ if __name__ == "__main__" and __package__ is None:
 from .. import params
 
 def word_to_labels(word):
-	if word in params.PUNCTUATION_LIST:
-		return params.CLASSES["punctuation"]
+	if word in list(params.CLASSES)[:-1]:
+		return params.CLASSES[word]
 	else:
-		return params.CLASSES["alphabet"]
+		return params.CLASSES["word"]
 
 """
 Source: https://github.com/keras-team/keras/blob/master/examples/image_ocr.py
