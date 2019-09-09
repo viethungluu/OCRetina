@@ -51,7 +51,7 @@ def draw_detections(image, boxes, scores, labels, color=None, label_to_name=None
 class RetinaNetWrapper(object):
     """docstring for RetinaNetWrapper"""
     def __init__(self, 
-                model, 
+                model_path, 
                 convert_model, 
                 backbone,
                 anchor_params  = None, 
@@ -63,10 +63,10 @@ class RetinaNetWrapper(object):
         
         # load the model
         print('Loading model, this may take a second...')
-        model = models.load_model(model, backbone_name=backbone)
+        self.model = models.load_model(model_path, backbone_name=backbone)
         # optionally convert the model
         if convert_model:
-            model = models.convert_model(model, anchor_params=anchor_params)
+            self.model = models.convert_model(self.model, anchor_params=anchor_params)
 
         self.score_threshold = score_threshold
         self.max_detections  = max_detections
