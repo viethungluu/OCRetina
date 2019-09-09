@@ -103,6 +103,7 @@ def build_model(args):
 				name='dense2')(concatenate([gru_2, gru_2b]))
 	
 	y_pred 	= Activation('softmax', name='softmax')(outputs)
+	Model(inputs=input_data, outputs=y_pred).summary()
 
 	labels 		 = Input(name='the_labels', shape=[args.max_word_len], dtype='float32')
 	input_length = Input(name='input_length', shape=[1], dtype='int64')
@@ -147,7 +148,7 @@ def main(args=None):
 		verbose=1,
 	)
 
-	return training_model.fit_generator(
+	return model.fit_generator(
 		generator=train_generator,
 		steps_per_epoch=len(train_generator) // args.batch_size,
 		epochs=args.epochs,
