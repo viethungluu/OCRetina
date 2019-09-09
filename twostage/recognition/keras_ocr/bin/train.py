@@ -52,6 +52,7 @@ def parse_args(args):
 
 	parser.add_argument('--snapshot-path',    help='Path to store snapshots of models during training (defaults to \'./snapshots\')', default='./snapshots')
 	parser.add_argument('--image-width',   	  help='Rescale the image so the width is image-width.', type=int, default=128)
+	parser.add_argument('--image-height',  	  help='Rescale the image so the width is image-width.', type=int, default=64)
 
 	return parser.parse_args(args)
 
@@ -62,13 +63,15 @@ def build_model(args):
 	time_dense_size = 32
 	rnn_size = 512
 	minibatch_size = 32
-	image_width = args.image_width
+
+	image_width  = args.image_width
+	image_height = args.image_height
 
 	# input is in W x H x C format
 	if keras.backend.image_data_format() == 'channels_first':
-		inputs  = Input(shape=(3, image_width, None))
+		inputs  = Input(shape=(3, image_width, image_height))
 	else:
-		inputs  = Input(shape=(image_width, None, 3))
+		inputs  = Input(shape=(image_width, image_height, 3))
 
 	outputs = inputs
 
@@ -129,6 +132,7 @@ def main(args=None):
 		batch_size=args.batch_size,
 		max_word_len=args.max_word_len,
 		image_width=args.image_width,
+		image_height=args.image_height,
 		downsample_factor=args.downsample_factor,
 	)
 

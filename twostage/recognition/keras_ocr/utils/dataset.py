@@ -54,7 +54,7 @@ def decode_batch(test_func, word_batch):
 		ret.append(outstr)
 	return ret
 
-def paint_text(word, image_width, max_word_len=16, font_scale=1, thickness=2, multi_fonts=False):
+def paint_text(word, image_width, image_height, max_word_len=16, font_scale=1, thickness=2, multi_fonts=False):
 	if len(word) > max_word_len:
 		word = word[:max_word_len]
 
@@ -79,8 +79,7 @@ def paint_text(word, image_width, max_word_len=16, font_scale=1, thickness=2, mu
 	image 	= speckle(image)
 
 	# rescale image to fit image_width
-	scale = float(image_width) / image.shape[1]
-	image = cv2.resize(image, dsize=(image_width, int(scale * image.shape[0])))
+	image = cv2.resize(image, dsize=(image_width, image_height))
 
 	label, length = text_to_labels(word, max_word_len)
 	annotations = {'labels': label, 'length': length}

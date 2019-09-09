@@ -23,6 +23,7 @@ class TextGenerator(keras.utils.Sequence):
         batch_size=128,
         max_word_len=32,
         image_width=128,
+        image_height=64,
         downsample_factor=2,
         preprocess_image=preprocess_image,
     ):
@@ -31,6 +32,7 @@ class TextGenerator(keras.utils.Sequence):
         self.preprocess_image   = preprocess_image
 
         self.image_width        = image_width
+        self.image_height        = image_height
         self.downsample_factor  = downsample_factor
 
         self.max_word_len   = max_word_len
@@ -79,7 +81,8 @@ class TextGenerator(keras.utils.Sequence):
         """ Load image and annotations for an image_index.
         """
         image, annotation = self.paint_func(self.word_list[image_index], 
-                                            image_width=self.image_width, 
+                                            image_width=self.image_width,
+                                            image_height=self.image_height,
                                             max_word_len=self.max_word_len)
         
         return image, annotation
