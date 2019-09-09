@@ -11,6 +11,10 @@ Facebook's Rosetta system for text detection and recognition in images (source: 
 
 Two models are trained independently:
 * A detection model (RetinaNet) is trained to detect word-level text (i.e. "love", "friend"), punctuations, and space character
+
+Google Colab: https://drive.google.com/file/d/0B7R3L0qnFcRjcHVGRE9HZHNZeFZ5T0RheVJPdlVlVlJGS0xn/view?usp=sharing
+
+
 * A RNN based model is trained to recognize word-level text
 
 Note that both models are trained using text image generated from a same vocabulary file.

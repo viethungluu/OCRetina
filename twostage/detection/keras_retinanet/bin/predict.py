@@ -27,6 +27,18 @@ def get_session():
     config.gpu_options.allow_growth = True
     return tf.Session(config=config)
 
+def draw_box(image, box, color, thickness=2):
+    """ Draws a box on an image with a given color.
+
+    # Arguments
+        image     : The image to draw on.
+        box       : A list of 4 elements (x1, y1, x2, y2).
+        color     : The color of the box.
+        thickness : The thickness of the lines to draw a box with.
+    """
+    b = np.array(box).astype(int)
+    cv2.rectangle(image, (b[0], b[1]), (b[2], b[3]), color, thickness, cv2.LINE_AA)
+    
 def draw_detections(image, boxes, scores, labels, color=(255, 0, 0), label_to_name=None, score_threshold=0.05):
     """ Draws detections in an image.
 
