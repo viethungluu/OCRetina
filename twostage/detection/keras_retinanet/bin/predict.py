@@ -18,6 +18,13 @@ from ..utils.config import read_config_file, parse_anchor_parameters
 from ..utils.image import resize_image, preprocess_image
 from .. import params
 
+def get_session():
+    """ Construct a modified tf session.
+    """
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    return tf.Session(config=config)
+    
 def draw_detections(image, boxes, scores, labels, color=None, label_to_name=None, score_threshold=0.05):
     """ Draws detections in an image.
 
