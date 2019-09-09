@@ -4,6 +4,6 @@ FONT_LIST = [cv2.FONT_HERSHEY_SIMPLEX, cv2.FONT_HERSHEY_PLAIN, cv2.FONT_HERSHEY_
 			cv2.FONT_HERSHEY_COMPLEX, cv2.FONT_HERSHEY_TRIPLEX, cv2.FONT_HERSHEY_COMPLEX_SMALL,
 			cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, cv2.FONT_HERSHEY_SCRIPT_COMPLEX]
 
-PUNCTUATION_LIST = [".", ",", "!", "?"]
+PUNCTUATION_LIST = [".", ",", "!", "?", " "]
 
-CLASSES = {"punctuation": 0, "alphabet": 1}
+CLASSES = {"punctuation": 0, "space": 1, "alphabet": 2}

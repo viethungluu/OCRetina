@@ -170,8 +170,8 @@ class TextGenerator(keras.utils.Sequence):
     def _random_image_shape(self, image_index):
         np.random.seed(image_index)
         image_width, image_height = \
-            np.random.randint(self.image_min_side // 1.5, self.image_max_side * 2),\
-            np.random.randint(self.image_min_side // 1.5, self.image_max_side * 2)
+            np.random.randint(self.image_min_side // 2, self.image_max_side * 1.5),\
+            np.random.randint(self.image_min_side // 2, self.image_max_side * 1.5)
 
         return image_width, image_height
 
