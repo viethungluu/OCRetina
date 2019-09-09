@@ -88,7 +88,7 @@ def default_classification_model(
     gru_2       = GRU(params.RNN_SIZE, return_sequences=True, kernel_initializer='he_normal', name='gru2')(gru1_merged)
     gru_2b      = GRU(params.RNN_SIZE, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='gru2_b')(gru1_merged)
     # transforms RNN output to character activations:
-    outputs     = Dense(params.NUM_TOKENS, kernel_initializer='he_normal', name='dense2')(concatenate([gru_2, gru_2b]))
+    outputs     = keras.layers.Dense(params.NUM_TOKENS, kernel_initializer='he_normal', name='dense2')(concatenate([gru_2, gru_2b]))
     outputs     = Activation('softmax', name='pyramid_classification_softmax')(outputs)
 
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
