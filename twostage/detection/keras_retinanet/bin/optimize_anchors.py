@@ -7,6 +7,8 @@ import numpy as np
 import scipy.optimize
 import codecs
 
+from tqdm import tqdm
+
 # Allow relative imports when being executed as script.
 if __name__ == "__main__" and __package__ is None:
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -142,8 +144,7 @@ if __name__ == "__main__":
     parser.add_argument('--objective', type=str, default='focal',
                         help='Function used to weight the difference between the target and proposed anchors. '
                              'Options: focal, avg, ce.')
-    parser.add_argument('--popsize', type=int, default=15,
-                        help='The total population size multiplier used by differential evolution.')
+    parser.add_argument('--popsize', type=int, default=15, help='The total population size multiplier used by differential evolution.')
     parser.add_argument('--image-min-side',   help='Rescale the image so the smallest side is min_side.', type=int, default=800)
     parser.add_argument('--image-max-side',   help='Rescale the image if the largest side is larger than max_side.', type=int, default=1333)
     parser.add_argument('--seed', type=int, help='Seed value to use for differential evolution.')
@@ -162,7 +163,7 @@ if __name__ == "__main__":
         seed = np.random.RandomState()
         
     word_list  = read_word_list(args.monogram_path)
-    for i in range(4096):
+    for i in tqdm(range(512)):
         img, annotations = load_data(word_list, i)
         for anno in annotations['bboxes']:
             scale = compute_resize_scale(img.shape, min_side=args.image_min_side, max_side=args.image_max_side)
