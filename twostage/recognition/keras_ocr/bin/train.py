@@ -84,7 +84,8 @@ def build_model(args):
 				name='conv2')(outputs)
 	outputs = MaxPooling2D(pool_size=(pool_size, pool_size), name='max2')(outputs)
 
-	outputs = Reshape(target_shape=(image_width // (pool_size ** 2), -1), name='reshape')(outputs)
+	outputs = Reshape(target_shape=(image_width // (pool_size ** 2), (img_h // (pool_size ** 2)) * conv_filters),
+					 name='reshape')(outputs)
 
 	# cuts down input size going into RNN:
 	outputs = Dense(time_dense_size, activation='relu', name='dense1')(outputs)
