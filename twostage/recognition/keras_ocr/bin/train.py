@@ -23,7 +23,6 @@ if __name__ == "__main__" and __package__ is None:
 
 from ..preprocessing.generator import TextGenerator
 from ..losses import ctc_lambda_func
-from ..utils.callback import VizCallback
 
 def makedirs(path):
 	# Intended behavior: try to create the directory,
