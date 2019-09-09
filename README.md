@@ -10,7 +10,7 @@ Facebook's Rosetta system for text detection and recognition in images (source: 
 ![Facebook's Rosetta system for text detection and recognition in images (source: Facebook \[3\])](/images/rosetta.PNG)
 
 Two models are trained independently:
-### Detection model 
+### Text detection model 
 A RetinaNet model is trained to detect word-level text (i.e. "love", "friend"), punctuations, and space character. The model is trained using image randomly generated. The font face is fixed for the first 19 epochs. After that, the font face is randomly chosen.
 
 Sample randomly-generated data
@@ -27,7 +27,7 @@ Test results after 19 epochs
 
 [Google Colab Notebook for training detection model](https://drive.google.com/file/d/0B7R3L0qnFcRjcHVGRE9HZHNZeFZ5T0RheVJPdlVlVlJGS0xn/view?usp=sharing)
 
-### A RNN based model is trained to recognize word-level text
+### Text recognition model
 A lightweight RNN-based model is trained to recognize text at word level. The model is trained using image randomly generated. The font face is fixed for the first 10 epochs. After that, the font face is randomly chosen.
 
 Sample randomly-generated data
@@ -35,6 +35,10 @@ Sample randomly-generated data
 ![Sample randomly-generated data](/images/data_recognition.png)
 
 [Google Colab Notebook for training recognition model](https://colab.research.google.com/drive/1fEPLZh888mu3NWrXaTYCKrCAfYmO-W-N)
+
+### End-to-end operation
+* Images are pass through detection model to detect bounding box of text at word-level
+* Image patches are rescaled to 128 x 64 (Width x Height) and feed to recognition model
 
 ## One-stage OCR system
 **THIS SOLUTIONS IS UNDER DEVELOPMENT AND NOT FULLY OPERATED**
