@@ -202,12 +202,12 @@ class TextGenerator(keras.utils.Sequence):
         """
         # set seed number to fix the image shape and its text for image_index
         
-        image_width, image_height = self._random_image_shape(image_index)
-        words_to_image = self._random_image_content(image_index)
+        image_width, image_height   = self._random_image_shape(image_index)
+        words_to_image              = self._random_image_content(image_index)
 
-        image, annotation = self.paint_func(words_to_image, 
-                                    image_width=image_width, 
-                                    image_height=image_height)
+        image, annotation           = self.paint_func(words_to_image, 
+                                        image_width=image_width, 
+                                        image_height=image_height)
         
         return image, annotation
 

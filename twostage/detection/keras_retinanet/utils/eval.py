@@ -74,17 +74,15 @@ def _get_detections(generator, model, score_threshold=0.05, max_detections=100, 
 
     # for i in progressbar.progressbar(range(generator.size()), prefix='Running network: '):
     for i in range(generator.size()):
-        raw_image, raw_lam  = generator.load_image(i)
+        raw_image           = generator.load_image(i)
         image               = generator.preprocess_image(raw_image.copy())
         image, scale        = generator.resize_image(image)
-
-        lam                 = np.full((1, 1, 1), raw_lam)
 
         if keras.backend.image_data_format() == 'channels_first':
             image = image.transpose((2, 0, 1))
 
         # run network
-        boxes, scores, labels = model.predict_on_batch([np.expand_dims(image, axis=0), lam])[:3]
+        boxes, scores, labels = model.predict_on_batch(np.expand_dims(image, axis=0))[:3]
 
         # correct boxes for image scale
         boxes /= scale
