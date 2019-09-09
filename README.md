@@ -13,7 +13,7 @@ Two models are trained independently:
 * A detection model (RetinaNet) is trained to detect word-level text (i.e. "love", "friend"), punctuations, and space character
 
 Google Colab: https://drive.google.com/file/d/0B7R3L0qnFcRjcHVGRE9HZHNZeFZ5T0RheVJPdlVlVlJGS0xn/view?usp=sharing
-
+![Test results after 4 epochs](/images/detection.png)
 
 * A RNN based model is trained to recognize word-level text
 
