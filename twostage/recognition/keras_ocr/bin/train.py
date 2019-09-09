@@ -106,7 +106,7 @@ def build_model(args):
 
 	Model(inputs=inputs, outputs=y_pred).summary()
 
-	labels 			= Input(name='the_labels', shape=[arg.max_word_len], dtype='float32')
+	labels 			= Input(name='the_labels', shape=[args.max_word_len], dtype='float32')
 	input_length 	= Input(name='input_length', shape=[1], dtype='int64')
 	label_length 	= Input(name='label_length', shape=[1], dtype='int64')
 	# Keras doesn't currently support loss funcs with extra parameters
