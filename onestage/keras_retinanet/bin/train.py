@@ -81,7 +81,7 @@ def model_with_weights(model, weights, skip_mismatch):
 
 def create_models(backbone_retinanet, max_word_length, weights, 
                 image_width, image_height, multi_gpu=0,
-                 freeze_backbone=False, lr=1e-5, config=None,):
+                 freeze_backbone=False, lr=1e-5, config=None):
     """ Creates three models (model, training_model, prediction_model).
 
     Args
@@ -108,9 +108,9 @@ def create_models(backbone_retinanet, max_word_length, weights,
         num_anchors   = anchor_params.num_anchors()
 
     if keras.backend.image_data_format() == 'channels_first':
-        inputs = keras.layers.Input(shape=(3, image_width, image_height))
+        inputs = keras.layers.Input(shape=(3, image_height, image_width))
     else:
-        inputs = keras.layers.Input(shape=(image_width, image_height, 3))
+        inputs = keras.layers.Input(shape=(image_height, image_width, 3))
 
     # Keras recommends initialising a multi-gpu model on the CPU to ease weight sharing, and to prevent OOM errors.
     # optionally wrap in a parallel model
@@ -388,7 +388,7 @@ def main(args=None):
             lr=args.lr,
             config=args.config,
             image_width=args.image_width,
-            image_height=args.image_height
+            image_height=args.image_height,
         )
 
     # print model summary

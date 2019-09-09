@@ -17,7 +17,7 @@ limitations under the License.
 import keras
 from . import backend
 
-def ctc(alpha=0.25, gamma=2.0):
+def focal(alpha=0.25, gamma=2.0):
     """ Create a functor for computing the CTC loss.
 
     Args
@@ -26,9 +26,8 @@ def ctc(alpha=0.25, gamma=2.0):
     Returns
         A functor that computes the CTC loss.
     """
-    def _ctc(y_true, y_pred):
-        labels         = y_true[:, :, :-2] # B x N x num_classes
-        label_length   = y_true[:, :, -2] # B x N x 1
+    def _focal(y_true, y_pred):
+        labels         = y_true[:, :, :-1] # B x N x num_classes
         anchor_state   = y_true[:, :, -1]  # B x N x 1 (-1 for ignore, 0 for background, 1 for object)
         
         classification = y_pred # B x N x num_classes
@@ -56,7 +55,7 @@ def ctc(alpha=0.25, gamma=2.0):
 
         return keras.backend.sum(cls_loss) / normalizer
 
-    return _ctc
+    return _focal
 
 def smooth_l1(sigma=3.0):
     """ Create a smooth L1 loss functor.

@@ -15,24 +15,37 @@ limitations under the License.
 """
 
 import keras
+from keras.layers.merge import add, concatenate
+
+import tensorflow as tf
+
 from .. import initializers
 from .. import layers
 from ..utils.anchors import AnchorParameters
 from . import assert_training_model
+from .. import params
 
+def squeeze_last2dims_operator(x4d) :
+    shape = tf.shape(x4d) # get dynamic tensor shape
+    x3d = tf.reshape(x4d, [shape[0], shape[1], shape[2] * shape[3]])
+    return x3d
+
+def squeeze_last2dims_shape(x4d_shape) :
+    in_batch, in_rows, in_cols, in_filters = x4d_shape
+    output_shape = ( in_batch, in_rows, in_cols * in_filters )
+    return output_shape
 
 def default_classification_model(
-    max_word_length,
+    inputs,
     num_anchors,
-    pyramid_feature_size=256,
-    prior_probability=0.01,
-    classification_feature_size=256,
+    time_dense_size=32,
+    rnn_size=512,
     name='classification_submodel'
 ):
     """ Creates the default classification submodel.
 
     Args
-        max_word_length             : Max word length to detect.
+        inputs                      : Input tensor with known size.
         num_anchors                 : Number of anchors to predict classification scores for at each feature level.
         pyramid_feature_size        : The number of filters to expect from the feature pyramid levels.
         classification_feature_size : The number of filters to use in the layers in the classification submodel.
@@ -47,42 +60,30 @@ def default_classification_model(
         'padding'     : 'same',
     }
 
-    if keras.backend.image_data_format() == 'channels_first':
-        inputs  = keras.layers.Input(shape=(pyramid_feature_size, None, None))
-    else:
-        inputs  = keras.layers.Input(shape=(None, None, pyramid_feature_size))
-    
     outputs = inputs
-    for i in range(4):
-        outputs = keras.layers.Conv2D(
-            filters=classification_feature_size,
-            activation='relu',
-            name='pyramid_classification_{}'.format(i),
-            kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
-            bias_initializer='zeros',
-            **options
-        )(outputs)
+    # tranpose data to Batch x Width x Height x Channel as input for RNN
+    outputs = keras.layers.Permute((2, 1, 3))(outputs) # W x H x C
 
-    outputs = keras.layers.Conv2D(
-        filters=max_word_length * num_anchors,
-        kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
-        bias_initializer=initializers.PriorProbability(probability=prior_probability),
-        name='pyramid_classification',
-        **options
-    )(outputs)
 
-    # reshape output and apply sigmoid
-    if keras.backend.image_data_format() == 'channels_first':
-        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute')(outputs)
-    
-    # shape B x N x max_word_length
-    outputs = keras.layers.Reshape((-1, max_word_length), name='pyramid_classification_reshape')(outputs)
-    
-    # shape B x N x max_word_length
-    outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid')(outputs)
+
+    # reshape data to feed to RNN
+    outputs = keras.layers.Lambda(squeeze_last2dims_operator, output_shape=squeeze_last2dims_shape)(outputs)
+
+    # cuts down input size going into RNN:
+    outputs = keras.layers.Dense(params.TIME_DENSE_SIZE, activation='relu', name='dense1')(outputs)
+
+    # Two layers of bidirectional GRUs
+    # GRU seems to work as well, if not better than LSTM:
+    gru_1       = GRU(params.RNN_SIZE, return_sequences=True, kernel_initializer='he_normal', name='gru1')(outputs)
+    gru_1b      = GRU(params.RNN_SIZE, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='gru1_b')(outputs)
+    gru1_merged = add([gru_1, gru_1b])
+    gru_2       = GRU(params.RNN_SIZE, return_sequences=True, kernel_initializer='he_normal', name='gru2')(gru1_merged)
+    gru_2b      = GRU(params.RNN_SIZE, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='gru2_b')(gru1_merged)
+    # transforms RNN output to character activations:
+    outputs     = keras.layers.Dense(params.NUM_TOKENS, kernel_initializer='he_normal', name='dense2')(concatenate([gru_2, gru_2b]))
+    outputs     = Activation('softmax', name='pyramid_classification_softmax')(outputs)
 
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
-
 
 def default_regression_model(
     num_values, 
@@ -175,21 +176,28 @@ def __create_pyramid_features(C3, C4, C5, feature_size=256):
     return [P3, P4, P5, P6, P7]
 
 
-def default_submodels(num_classes, num_anchors):
+def default_submodels(max_word_length, num_anchors):
     """ Create a list of default submodels used for object detection.
 
     The default submodels contains a regression submodel and a classification submodel.
 
     Args
-        num_classes : Number of classes to use.
+        max_word_length : Maximum length of a word.
         num_anchors : Number of base anchors.
 
     Returns
         A list of tuple, where the first element is the name of the submodel and the second element is the submodel itself.
     """
+    classification_models = []
+
+    if keras.backend.image_data_format() == 'channels_first':
+        inputs  = keras.layers.Input(shape=(pyramid_feature_size, None, None))
+    else:
+        inputs  = keras.layers.Input(shape=(None, None, pyramid_feature_size))
+
     return [
         ('regression', default_regression_model(4, num_anchors)),
-        ('classification', default_classification_model(num_classes, num_anchors))
+        ('classification', default_classification_model(max_word_length, num_anchors))
     ]
 
 
@@ -199,7 +207,7 @@ def __build_model_pyramid(name, model, features):
     Args
         name     : Name of the submodel.
         model    : The submodel to evaluate.
-        features : The FPN features (P3, P4, P5, P6, P7).
+        features : The FPN features.
 
     Returns
         A tensor containing the response from the submodel on the FPN features.
@@ -212,7 +220,7 @@ def __build_pyramid(models, features):
 
     Args
         models   : List of sumodels to run on each pyramid level (by default only regression, classifcation).
-        features : The FPN features (P3, P4, P5, P6, P7)
+        features : The FPN features.
 
     Returns
         A list of tensors, one for each submodel.
@@ -255,7 +263,7 @@ def retinanet(
     num_anchors             = None,
     create_pyramid_features = __create_pyramid_features,
     submodels               = None,
-    name                    = 'retinanet'
+    name                    = 'retinanet',
 ):
     """ Construct a RetinaNet model on top of a backbone.
 

@@ -256,7 +256,7 @@ class TextGenerator(keras.utils.Sequence):
     def resize_image(self, image):
         """ Resize an image using image_min_side and image_max_side.
         """
-        return resize_image(image, min_side=self.image_width, max_side=self.image_height)
+        return resize_image(image, image_width=self.image_width)
 
     def preprocess_group_entry(self, image, annotations):
         """ Preprocess image and its annotations.
@@ -299,8 +299,6 @@ class TextGenerator(keras.utils.Sequence):
         for image_index, image in enumerate(image_group):
             image_batch[image_index, :image.shape[0], :image.shape[1], :image.shape[2]] = image
 
-        # convert image batch to Batch x Width x Height x Channel
-        image_batch = image_batch.transpose((0, 2, 1, 3))
         if keras.backend.image_data_format() == 'channels_first':
             image_batch = image_batch.transpose((0, 3, 1, 2))
 
@@ -310,6 +308,7 @@ class TextGenerator(keras.utils.Sequence):
         anchor_params = None
         if self.config and 'anchor_parameters' in self.config:
             anchor_params = parse_anchor_parameters(self.config)
+        
         return anchors_for_shape(image_shape, anchor_params=anchor_params, shapes_callback=self.compute_shapes)
 
     def compute_targets(self, image_group, annotations_group):
