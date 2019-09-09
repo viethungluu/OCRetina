@@ -16,6 +16,43 @@ SIZES = [32, 64, 128, 256, 512]
 STRIDES = [8, 16, 32, 64, 128]
 state = {'best_result': sys.maxsize}
 
+def read_word_list(text_file):
+    # monogram file is sorted by frequency in english speech
+    word_list = []
+    with codecs.open(text_file, mode='r', encoding='utf-8') as f:
+        for line in f:
+            word = line.strip()
+            word_list.append(word)
+    return np.array(word_list)
+
+def seed_numer(image_index):
+    return image_index
+
+def random_image_shape(image_index):
+    np.random.seed(seed_numer(image_index))
+
+    image_width, image_height = \
+        np.random.randint(800 // 2, 1333 * 1.5),\
+        np.random.randint(800 // 2, 1333 * 1.5)
+
+    return image_width, image_height
+
+def random_image_content(word_list, image_index):
+    np.random.seed(seed_numer(image_index))
+
+    return np.random.choice(word_list, size=np.random.randint(150 // 2, 150))
+
+def load_data(word_list, image_index):
+    """ Load image and annotations for an image_index.
+    """
+    # set seed number to fix the image shape and its text for image_index
+    
+    image_width, image_height   = random_image_shape(image_index)
+    words_to_image              = random_image_content(image_index)
+
+    image, annotation           = paint_text(words_to_image, image_width=image_width, image_height=image_height)
+
+    return image, annotation
 
 def calculate_config(values, ratio_count):
     split_point = int((ratio_count - 1) / 2)
@@ -28,7 +65,6 @@ def calculate_config(values, ratio_count):
     scales = values[split_point:]
 
     return AnchorParameters(SIZES, STRIDES, ratios, scales)
-
 
 def base_anchors_for_shape(pyramid_levels=None, anchor_params=None):
     if pyramid_levels is None:
@@ -48,7 +84,6 @@ def base_anchors_for_shape(pyramid_levels=None, anchor_params=None):
         all_anchors = np.append(all_anchors, anchors, axis=0)
 
     return all_anchors
-
 
 def average_overlap(values, entries, state, image_shape, mode='focal', ratio_count=3, include_stride=False):
     anchor_params = calculate_config(values, ratio_count)
@@ -117,25 +152,18 @@ if __name__ == "__main__":
         seed = np.random.RandomState(args.seed)
     else:
         seed = np.random.RandomState()
-
-    for i in range(10000):
         
-
-    
-    data_dir = os.path.dirname(args.annotations)
-    with _open_for_csv(args.annotations) as file:
-        for line, row in enumerate(csv.reader(file, delimiter=',')):
-            x1, y1, x2, y2 = list(map(lambda x: int(x), row[1:5]))
+    word_list  = read_word_list(parser.monogram_path)
+    for i in range(4096):
+        img, annotations = load_data(word_list, i)
+        for anno in annotations['bboxes']:
+            x1, y1, x2, y2 = list(map(lambda x: int(x), anno))
 
             if not x1 or not y1 or not x2 or not y2:
                 continue
 
-            if args.resize:
-                img = tiff.imread(os.path.join(data_dir, row[0]))
-                if len(img.shape) == 2:
-                    img = np.expand_dims(img, 2)
-                scale = compute_resize_scale(img.shape, min_side=args.image_min_side, max_side=args.image_max_side)
-                x1, y1, x2, y2 = list(map(lambda x: int(x) * scale, row[1:5]))
+            scale = compute_resize_scale(img.shape, min_side=args.image_min_side, max_side=args.image_max_side)
+            x1, y1, x2, y2 = list(map(lambda x: int(x) * scale, row[1:5]))
 
             max_x = max(x2, max_x)
             max_y = max(y2, max_y)

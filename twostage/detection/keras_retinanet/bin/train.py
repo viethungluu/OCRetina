@@ -232,11 +232,13 @@ def create_generators(args, preprocess_image):
         max_string_len=args.max_string_len,
         transform_generator=transform_generator,
         visual_effect_generator=visual_effect_generator,
+        seed_offset=1600,
         **common_args
     )
 
     validation_generator = TextGenerator(
         args.monogram_path,
+        num_images=1600,
         max_string_len=args.max_string_len,
         **common_args
     )

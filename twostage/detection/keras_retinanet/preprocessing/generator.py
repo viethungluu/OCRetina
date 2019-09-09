@@ -63,7 +63,7 @@ class TextGenerator(keras.utils.Sequence):
         preprocess_image=preprocess_image,
         config=None,
         classes=params.CLASSES,
-        stage="train"
+        seed_offset=0
     ):
         """ Initialize Generator object.
 
@@ -100,7 +100,7 @@ class TextGenerator(keras.utils.Sequence):
         for key, value in self.classes.items():
             self.labels[value] = key
 
-        self.stage                   = stage
+        self.seed_offset = seed_offset
 
         self.word_list               = self.read_word_list(monogram_file)
         print("Number of words", len(self.word_list))
@@ -167,8 +167,12 @@ class TextGenerator(keras.utils.Sequence):
         """
         return self.num_images
 
+    def seed_numer(self, image_index):
+        return image_index + self.seed_offset
+
     def _random_image_shape(self, image_index):
-        np.random.seed(image_index)
+        np.random.seed(self.seed_numer(image_index))
+
         image_width, image_height = \
             np.random.randint(self.image_min_side // 2, self.image_max_side * 1.5),\
             np.random.randint(self.image_min_side // 2, self.image_max_side * 1.5)
@@ -176,7 +180,7 @@ class TextGenerator(keras.utils.Sequence):
         return image_width, image_height
 
     def _random_image_content(self, image_index):
-        np.random.seed(image_index)
+        np.random.seed(self.seed_numer(image_index))
         return np.random.choice(self.word_list, size=np.random.randint(self.max_string_len // 2, self.max_string_len))
 
     def image_aspect_ratio(self, image_index):
