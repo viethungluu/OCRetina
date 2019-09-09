@@ -170,7 +170,6 @@ class TextGenerator(keras.utils.Sequence):
 
         # compute network targets
         labels = self.compute_targets(annotations_group)
-        print(labels.shape)
 
         # compute network inputs
         images  = self.compute_inputs(image_group)
