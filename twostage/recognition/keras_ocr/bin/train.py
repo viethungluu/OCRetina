@@ -104,14 +104,23 @@ def build_model(args):
 	
 	y_pred 	= Activation('softmax', name='softmax')(outputs)
 
-	model = Model(inputs=inputs, outputs=y_pred)
-	model.summary()
+	Model(inputs=inputs, outputs=y_pred).summary()
+
+	labels 			= Input(name='the_labels', shape=[arg.max_word_len], dtype='float32')
+	input_length 	= Input(name='input_length', shape=[1], dtype='int64')
+	label_length 	= Input(name='label_length', shape=[1], dtype='int64')
+	# Keras doesn't currently support loss funcs with extra parameters
+	# so CTC loss is implemented in a lambda layer
+	loss_out = Lambda(losses.ctc_lambda_func, output_shape=(1,), name='ctc')
+				([y_pred, labels, input_length, label_length])
 
 	# clipnorm seems to speeds up convergence
 	sgd = SGD(lr=args.lr, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 
+	model = Model(inputs=[inputs, labels, input_length, label_length], outputs=loss_out)
+
 	# the loss calc occurs elsewhere, so use a dummy lambda func for the loss
-	model.compile(loss=losses.ctc(), optimizer=sgd)
+	model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
 
 	return model
 
