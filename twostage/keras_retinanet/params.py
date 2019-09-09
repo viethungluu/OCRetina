@@ -5,8 +5,5 @@ FONT_LIST = [cv2.FONT_HERSHEY_SIMPLEX, cv2.FONT_HERSHEY_PLAIN, cv2.FONT_HERSHEY_
 			cv2.FONT_HERSHEY_SCRIPT_SIMPLEX, cv2.FONT_HERSHEY_SCRIPT_COMPLEX]
 
 PUNCTUATION_LIST = [".", ",", "!", "?"]
-ALPHABET 		 = "abcdefghijklmnopqrstuvwxyz" + "".join(PUNCTUATION_LIST) + " "
 
-TIME_DENSE_SIZE = 32
-RNN_SIZE 		= 512
-NUM_TOKENS 		= len(ALPHABET)
+CLASSES = {"punctuation": 0, "alphabet": 1}

@@ -79,14 +79,13 @@ def model_with_weights(model, weights, skip_mismatch):
         model.load_weights(weights, by_name=True, skip_mismatch=skip_mismatch)
     return model
 
-def create_models(backbone_retinanet, max_word_length, weights, 
-                image_width, image_height, multi_gpu=0,
-                 freeze_backbone=False, lr=1e-5, config=None):
+def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0,
+                  freeze_backbone=False, lr=1e-5, config=None):
     """ Creates three models (model, training_model, prediction_model).
 
     Args
         backbone_retinanet : A function to call to create a retinanet model with a given backbone.
-        max_word_length    : Max word length to detect.
+        num_classes        : The number of classes to train.
         weights            : The weights to load into the model.
         multi_gpu          : The number of GPUs to use for training.
         freeze_backbone    : If True, disables learning for the backbone.
@@ -107,20 +106,15 @@ def create_models(backbone_retinanet, max_word_length, weights,
         anchor_params = parse_anchor_parameters(config)
         num_anchors   = anchor_params.num_anchors()
 
-    if keras.backend.image_data_format() == 'channels_first':
-        inputs = keras.layers.Input(shape=(3, image_height, image_width))
-    else:
-        inputs = keras.layers.Input(shape=(image_height, image_width, 3))
-
     # Keras recommends initialising a multi-gpu model on the CPU to ease weight sharing, and to prevent OOM errors.
     # optionally wrap in a parallel model
     if multi_gpu > 1:
         from keras.utils import multi_gpu_model
         with tf.device('/cpu:0'):
-            model = model_with_weights(backbone_retinanet(max_word_length, inputs=inputs, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
+            model = model_with_weights(backbone_retinanet(num_classes, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
         training_model = multi_gpu_model(model, gpus=multi_gpu)
     else:
-        model          = model_with_weights(backbone_retinanet(max_word_length, inputs=inputs, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
+        model          = model_with_weights(backbone_retinanet(num_classes, num_anchors=num_anchors, modifier=modifier), weights=weights, skip_mismatch=True)
         training_model = model
 
     # make prediction model
@@ -130,7 +124,7 @@ def create_models(backbone_retinanet, max_word_length, weights,
     training_model.compile(
         loss={
             'regression'    : losses.smooth_l1(),
-            'classification': losses.ctc()
+            'classification': losses.focal()
         },
         optimizer=keras.optimizers.adam(lr=lr, clipnorm=0.001)
     )
@@ -241,18 +235,18 @@ def create_generators(args, preprocess_image):
 
     train_generator = TextGenerator(
         args.monogram_path,
-        max_word_len=args.max_word_length,
+        max_string_len=args.max_string_len,
         transform_generator=transform_generator,
         visual_effect_generator=visual_effect_generator,
         **common_args
     )
 
-    # validation_generator = TextGenerator(
-    #     args.monogram_path,
-    #     shuffle_groups=False,
-    #     **common_args
-    # )
-    validation_generator = None
+    validation_generator = TextGenerator(
+        args.monogram_path,
+        max_string_len=args.max_string_len,
+        shuffle_groups=False,
+        **common_args
+    )
 
     return train_generator, validation_generator
 
@@ -303,7 +297,7 @@ def parse_args(args):
     group.add_argument('--no-weights',        help='Don\'t initialize the model with any weights.', dest='imagenet_weights', action='store_const', const=False)
 
     parser.add_argument('--monogram-path',    help='Path to file containing monogram words for training')
-    parser.add_argument('--max-word-length',  help='Maximum length of a word.', type=int, default=16)
+    parser.add_argument('--max-string-len',   help='Maximum number of words in each image.', type=int, default=150)
 
     parser.add_argument('--backbone',         help='Backbone model used by retinanet.', default='resnet50', type=str)
     parser.add_argument('--batch-size',       help='Size of the batches.', default=1, type=int)
@@ -320,8 +314,8 @@ def parse_args(args):
     parser.add_argument('--no-evaluation',    help='Disable per epoch evaluation.', dest='evaluation', action='store_false')
     parser.add_argument('--freeze-backbone',  help='Freeze training of backbone layers.', action='store_true')
     parser.add_argument('--random-transform', help='Randomly transform image and annotations.', action='store_true')
-    parser.add_argument('--image-width',   help='Rescale the image so the smallest side is min_side.', type=int, default=800)
-    parser.add_argument('--image-height',   help='Rescale the image if the largest side is larger than max_side.', type=int, default=1333)
+    parser.add_argument('--image-width',      help='Rescale the image so the smallest side is min_side.', type=int, default=800)
+    parser.add_argument('--image-height',     help='Rescale the image if the largest side is larger than max_side.', type=int, default=1333)
     parser.add_argument('--config',           help='Path to a configuration parameters .ini file.')
     parser.add_argument('--weighted-average', help='Compute the mAP using the weighted average of precisions among classes.', action='store_true')
     parser.add_argument('--compute-val-loss', help='Compute validation loss during training', dest='compute_val_loss', action='store_true')
@@ -381,14 +375,12 @@ def main(args=None):
         print('Creating model, this may take a second...')
         model, training_model, prediction_model = create_models(
             backbone_retinanet=backbone.retinanet,
-            max_word_length=args.max_word_length,
+            num_classes=train_generator.num_classes(),
             weights=weights,
             multi_gpu=args.multi_gpu,
             freeze_backbone=args.freeze_backbone,
             lr=args.lr,
-            config=args.config,
-            image_width=args.image_width,
-            image_height=args.image_height,
+            config=args.config
         )
 
     # print model summary

@@ -33,8 +33,10 @@ from ..utils.image import (
     preprocess_image,
     resize_image,
 )
+
 from ..utils.paint_text import paint_text
 from ..utils.transform import transform_aabb
+from .. import params
 
 SEED_NUMBER = 28
 
@@ -48,7 +50,6 @@ class TextGenerator(keras.utils.Sequence):
         num_images=16000,
         paint_func=paint_text,
         max_string_len=150,
-        max_word_len=16,
         transform_generator = None,
         visual_effect_generator=None,
         batch_size=4,
@@ -59,6 +60,7 @@ class TextGenerator(keras.utils.Sequence):
         compute_shapes=guess_shapes,
         preprocess_image=preprocess_image,
         config=None,
+        classes=params.CLASSES,
         stage="train"
     ):
         """ Initialize Generator object.
@@ -79,7 +81,6 @@ class TextGenerator(keras.utils.Sequence):
         self.image_height   = image_height
         self.num_images     = num_images
         self.max_string_len = max_string_len
-        self.max_word_len   = max_word_len
 
         self.transform_generator     = transform_generator
         self.visual_effect_generator = visual_effect_generator
@@ -89,6 +90,12 @@ class TextGenerator(keras.utils.Sequence):
         self.compute_shapes          = compute_shapes
         self.preprocess_image        = preprocess_image
         self.config                  = config
+        
+        self.classes                 = classes
+        self.labels = {}
+        for key, value in self.classes.items():
+            self.labels[value] = key
+
         self.stage                   = stage
 
         self.word_list               = self.read_word_list(monogram_file)
@@ -96,6 +103,31 @@ class TextGenerator(keras.utils.Sequence):
 
         # Define groups
         self.group_images()
+
+    def num_classes(self):
+        """ Number of classes in the dataset.
+        """
+        return max(self.classes.values()) + 1
+
+    def has_label(self, label):
+        """ Return True if label is a known label.
+        """
+        return label in self.labels
+
+    def has_name(self, name):
+        """ Returns True if name is a known class.
+        """
+        return name in self.classes
+
+    def name_to_label(self, name):
+        """ Map name to label.
+        """
+        return self.classes[name]
+
+    def label_to_name(self, label):
+        """ Map label to name.
+        """
+        return self.labels[label]
 
     def read_word_list(self, text_file):
         # monogram file is sorted by frequency in english speech
@@ -154,8 +186,7 @@ class TextGenerator(keras.utils.Sequence):
 
         image, annotation = self.paint_func(words_to_image, 
                                     image_width=self.image_width, 
-                                    image_height=self.image_height,
-                                    max_word_len=self.max_word_len)
+                                    image_height=self.image_height)
         
         return image, annotation
 
