@@ -36,17 +36,16 @@ def squeeze_last2dims_shape(x4d_shape) :
     return output_shape
 
 def default_classification_model(
-    max_word_length,
+    inputs,
     num_anchors,
-    pyramid_feature_size=256,
-    prior_probability=0.01,
-    classification_feature_size=256,
+    time_dense_size=32,
+    rnn_size=512,
     name='classification_submodel'
 ):
     """ Creates the default classification submodel.
 
     Args
-        max_word_length             : Max word length to detect.
+        inputs                      : Input tensor with known size.
         num_anchors                 : Number of anchors to predict classification scores for at each feature level.
         pyramid_feature_size        : The number of filters to expect from the feature pyramid levels.
         classification_feature_size : The number of filters to use in the layers in the classification submodel.
@@ -61,21 +60,14 @@ def default_classification_model(
         'padding'     : 'same',
     }
 
-    if keras.backend.image_data_format() == 'channels_first':
-        inputs  = keras.layers.Input(shape=(pyramid_feature_size, None, None))
-    else:
-        inputs  = keras.layers.Input(shape=(None, None, pyramid_feature_size))
-
     outputs = inputs
-
     # tranpose data to Batch x Width x Height x Channel as input for RNN
-    outputs = keras.layers.Permute((2, 1, 3))(outputs)
+    outputs = keras.layers.Permute((2, 1, 3))(outputs) # W x H x C
+
+
 
     # reshape data to feed to RNN
-    # outputs = keras.layers.Lambda(squeeze_last2dims_operator, output_shape=squeeze_last2dims_shape)(outputs)
-    x_shape = tf.shape(outputs)
-    outputs = tf.reshape(outputs, [x_shape[0], x_shape[1], tf.reduce_prod(x_shape[2:])])
-
+    outputs = keras.layers.Lambda(squeeze_last2dims_operator, output_shape=squeeze_last2dims_shape)(outputs)
 
     # cuts down input size going into RNN:
     outputs = keras.layers.Dense(params.TIME_DENSE_SIZE, activation='relu', name='dense1')(outputs)
@@ -92,7 +84,6 @@ def default_classification_model(
     outputs     = Activation('softmax', name='pyramid_classification_softmax')(outputs)
 
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
-
 
 def default_regression_model(
     num_values, 
@@ -197,6 +188,13 @@ def default_submodels(max_word_length, num_anchors):
     Returns
         A list of tuple, where the first element is the name of the submodel and the second element is the submodel itself.
     """
+    classification_models = []
+
+    if keras.backend.image_data_format() == 'channels_first':
+        inputs  = keras.layers.Input(shape=(pyramid_feature_size, None, None))
+    else:
+        inputs  = keras.layers.Input(shape=(None, None, pyramid_feature_size))
+
     return [
         ('regression', default_regression_model(4, num_anchors)),
         ('classification', default_classification_model(max_word_length, num_anchors))
