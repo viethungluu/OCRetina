@@ -10,13 +10,13 @@ def ctc():
 	    A functor that computes the CTC loss.
 	"""
 	def _ctc(y_true, y_pred):
-		labels 			= y_true[:, :-2] # (batch x max_word_length)
-		input_length 	= y_true[:, -2]  # (batch x 1)
-		label_length 	= y_true[:, -1]  # (batch x 1)
+		labels 			= y_true[0, :, :-2] # (batch x max_word_length)
+		input_length 	= y_true[0, :, -2]  # (batch x 1)
+		label_length 	= y_true[0, :, -1]  # (batch x 1)
 		
 		y_pred 			= y_pred[:, 2:, :] # batch x time_step x num_categories
 
-		print(K.int_shape(y_pred), K.int_shape(y_true))
+		print(K.int_shape(y_pred), K.int_shape(labels), K.int_shape(input_length), K.int_shape(label_length))
 
 		return K.ctc_batch_cost(labels, y_pred, input_length, label_length)
 

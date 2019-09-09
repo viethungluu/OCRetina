@@ -149,14 +149,14 @@ class TextGenerator(keras.utils.Sequence):
     def compute_targets(self, annotations_group):
         """ Compute target outputs for the network using images and their annotations.
         """        
-        labels = np.ones([self.batch_size, self.max_word_len + 2])
+        labels = np.ones([self.batch_size, 1, self.max_word_len + 2])
 
         for i in range(self.batch_size):
             labels[i, :-2] = annotations_group[i]["labels"]
             labels[i, -2] = self.image_width // self.downsample_factor - 2
             labels[i, -1] = annotations_group[i]["length"]
 
-        return labels
+        return np.expand_dims(labels, 0)
 
     def compute_input_output(self, group):
         """ Compute inputs and target outputs for the network.
