@@ -66,11 +66,10 @@ def build_model(args):
 
 	# input is in W x H x C format
 	if keras.backend.image_data_format() == 'channels_first':
-		input_shape  = keras.layers.Input(shape=(3, image_width, None))
+		inputs  = Input(shape=(3, image_width, None))
 	else:
-		input_shape  = keras.layers.Input(shape=(image_width, None, 3))
+		inputs  = Input(shape=(image_width, None, 3))
 
-	inputs 	= Input(name='inputs', shape=input_shape, dtype='float32')
 	outputs = inputs
 
 	outputs = Conv2D(conv_filters, kernel_size, padding='same',
