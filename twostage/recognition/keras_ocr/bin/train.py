@@ -163,7 +163,7 @@ def main(args=None):
 
 	return model.fit_generator(
 		generator=train_generator,
-		steps_per_epoch=len(train_generator) // args.batch_size,
+		steps_per_epoch=train_generator.size() // args.batch_size,
 		epochs=args.epochs,
 		verbose=1,
 		callbacks=[checkpoint],

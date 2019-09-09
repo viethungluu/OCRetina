@@ -44,7 +44,6 @@ class TextGenerator(keras.utils.Sequence):
         self.word_list      = self.read_word_list(word_file)
         print("Number of words", len(self.word_list))
 
-
         # Define groups
         self.group_images()
 
