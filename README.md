@@ -1,7 +1,5 @@
 # OCRetina
 
-**THIS REPO IS UNDER DEVELOPMENT**
-
 # Solutions
 This repo provide end-to-end CNNs for text detection and recognition based on RetinaNet. Currently, two solutions are proposed:
 
@@ -11,7 +9,14 @@ Facebook's Rosetta system for text detection and recognition in images (source: 
 
 ![Facebook's Rosetta system for text detection and recognition in images (source: Facebook \[3\])](/images/rosetta.PNG)
 
+Two models are trained independently:
+* A detection model (RetinaNet) is trained to detect word-level text (i.e. "love", "friend"), punctuations, and space character
+* A RNN based model is trained to recognize word-level text
+
+Note that both models are trained using text image generated from a same vocabulary file.
+
 ## One-stage OCR system
+**THIS SOLUTIONS IS UNDER DEVELOPMENT**
 
 One-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)
 
