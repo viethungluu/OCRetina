@@ -24,7 +24,7 @@ class TextGenerator(keras.utils.Sequence):
         max_word_len=32,
         image_width=128,
         image_height=64,
-        downsample_factor=2,
+        downsample_factor=4,
         preprocess_image=preprocess_image,
     ):
         """ Initialize Generator object."""

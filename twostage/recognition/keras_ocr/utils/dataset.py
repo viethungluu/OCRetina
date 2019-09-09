@@ -55,6 +55,7 @@ def decode_batch(test_func, word_batch):
 	return ret
 
 def paint_text(word, image_width, image_height, max_word_len=16, font_scale=1, thickness=2, multi_fonts=False):
+	# if the word is too long, it appear to small in the image
 	if len(word) > max_word_len:
 		word = word[:max_word_len]
 
