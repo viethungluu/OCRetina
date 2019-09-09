@@ -11,13 +11,13 @@ def ctc():
 	"""
 	def _ctc(y_true, y_pred):
 		labels 			= y_true[:-2] # (batch x max_word_length)
-		labels 			= K.reshape(labels, (-1,))
+		labels 			= K.reshape(labels, (K.int_shape(labels)[0], -1))
 
 		input_length 	= y_true[-2]  # (batch x 1)
-		input_length 	= K.reshape(input_length, (-1,))
+		input_length 	= K.reshape(input_length, (K.int_shape(input_length)[0], -1))
 
 		label_length 	= y_true[-1]  # (batch x 1)
-		label_length 	= K.reshape(label_length, (-1,))
+		label_length 	= K.reshape(label_length, (K.int_shape(label_length)[0], -1))
 		
 		y_pred 			= y_pred[:, 2:, :] # batch x time_step x num_categories
 
