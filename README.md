@@ -36,9 +36,8 @@ Sample randomly-generated data
 
 [Google Colab Notebook for training recognition model](https://colab.research.google.com/drive/1fEPLZh888mu3NWrXaTYCKrCAfYmO-W-N)
 
-### End-to-end operation
-* Images are pass through detection model to detect bounding box of text at word-level
-* Image patches are rescaled to 128 x 64 (Width x Height) and feed to recognition model
+### Existing problems
+* While the input shape for detection model can be variable, the input shape for recognition must be fixed. This is due to the limitation of tf.dynamic_rnn which expects a fully-defined feature shape during construction. In our solution, the image is scaled to 128 x 62 (width x height) before feeding to recognition model.
 
 ## One-stage OCR system
 **THIS SOLUTIONS IS UNDER DEVELOPMENT AND NOT FULLY OPERATED**
