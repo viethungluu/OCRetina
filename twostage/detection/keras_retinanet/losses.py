@@ -40,8 +40,13 @@ def focal(alpha=0.25, gamma=2.0):
         labels         = backend.gather_nd(labels, indices)
         classification = backend.gather_nd(classification, indices)
 
-        # compute the ctc loss
-        cls_loss     = keras.backend.binary_crossentropy(labels, classification)
+        # compute the focal loss
+        alpha_factor = keras.backend.ones_like(labels) * alpha
+        alpha_factor = backend.where(keras.backend.equal(labels, 1), alpha_factor, 1 - alpha_factor)
+        focal_weight = backend.where(keras.backend.equal(labels, 1), 1 - classification, classification)
+        focal_weight = alpha_factor * focal_weight ** gamma
+
+        cls_loss     = focal_weight * keras.backend.binary_crossentropy(labels, classification)
 
         # compute the normalizer: the number of positive anchors
         normalizer = backend.where(keras.backend.equal(anchor_state, 1))
