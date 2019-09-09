@@ -50,6 +50,8 @@ class TextGenerator(keras.utils.Sequence):
         num_images=16000,
         paint_func=paint_text,
         max_string_len=150,
+        group_method='ratio',  # one of 'none', 'random', 'ratio'
+        shuffle_groups=True,
         transform_generator = None,
         visual_effect_generator=None,
         batch_size=4,
@@ -85,6 +87,8 @@ class TextGenerator(keras.utils.Sequence):
         self.transform_generator     = transform_generator
         self.visual_effect_generator = visual_effect_generator
         self.batch_size              = int(batch_size)
+        self.group_method           = group_method
+        self.shuffle_groups         = shuffle_groups
         self.transform_parameters    = transform_parameters or TransformParameters()
         self.compute_anchor_targets  = compute_anchor_targets
         self.compute_shapes          = compute_shapes
@@ -141,16 +145,21 @@ class TextGenerator(keras.utils.Sequence):
     def group_images(self):
         """ Order the images according to self.order and makes groups of self.batch_size.
         """
-        # randomly determine the order of the images
+        # determine the order of the images
         order = list(range(self.size()))
-        np.random.shuffle(order)
+        if self.group_method == 'random':
+            random.shuffle(order)
+        elif self.group_method == 'ratio':
+            order.sort(key=lambda x: self.image_aspect_ratio(x))
+
         # divide into groups, one group = one batch
         self.groups = [[order[x % len(order)] for x in range(i, i + self.batch_size)] for i in range(0, len(order), self.batch_size)]
 
     def on_epoch_end(self):
         """ Shuffle the dataset
         """
-        self.group_images()
+        if self.shuffle_groups:
+            random.shuffle(self.groups)
 
     # -----------------------------------------
     def size(self):
