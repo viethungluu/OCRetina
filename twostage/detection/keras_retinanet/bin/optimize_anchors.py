@@ -144,8 +144,8 @@ if __name__ == "__main__":
                              'Options: focal, avg, ce.')
     parser.add_argument('--popsize', type=int, default=15,
                         help='The total population size multiplier used by differential evolution.')
-    parser.add_argument('--image-width',      help='Rescale the image so the smallest side is min_side.', type=int, default=800)
-    parser.add_argument('--image-height',     help='Rescale the image if the largest side is larger than max_side.', type=int, default=1333)
+    parser.add_argument('--image-min-side',   help='Rescale the image so the smallest side is min_side.', type=int, default=800)
+    parser.add_argument('--image-max-side',   help='Rescale the image if the largest side is larger than max_side.', type=int, default=1333)
     parser.add_argument('--seed', type=int, help='Seed value to use for differential evolution.')
     args = parser.parse_args()
 
