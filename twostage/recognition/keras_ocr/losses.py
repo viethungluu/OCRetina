@@ -14,7 +14,7 @@ def ctc():
 		input_length 	= y_true[:, :, -2]
 		label_length 	= y_true[:, :, -1]
 		y_pred 			= y_pred[:, 2:, :]
-		
+
 		return K.ctc_batch_cost(labels, y_pred, input_length, label_length)
 
-    return _ctc
+	return _ctc
