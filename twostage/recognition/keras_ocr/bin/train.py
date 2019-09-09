@@ -22,7 +22,7 @@ if __name__ == "__main__" and __package__ is None:
 	__package__ = "keras_ocr.bin"
 
 from ..preprocessing.generator import TextGenerator
-from ..losses import ctc_lambda_func
+from .. import losses
 
 def makedirs(path):
 	# Intended behavior: try to create the directory,
@@ -103,23 +103,15 @@ def build_model(args):
 				name='dense2')(concatenate([gru_2, gru_2b]))
 	
 	y_pred 	= Activation('softmax', name='softmax')(outputs)
-	Model(inputs=inputs, outputs=y_pred).summary()
 
-	labels 		 = Input(name='the_labels', shape=[args.max_word_len], dtype='float32')
-	input_length = Input(name='input_length', shape=[1], dtype='int64')
-	label_length = Input(name='label_length', shape=[1], dtype='int64')
-	
-	# Keras doesn't currently support loss funcs with extra parameters
-	# so CTC loss is implemented in a lambda layer
-	loss_out = Lambda(ctc_lambda_func, output_shape=(1,), name='ctc')([y_pred, labels, input_length, label_length])
+	model = Model(inputs=inputs, outputs=y_pred)
+	model.summary()
 
 	# clipnorm seems to speeds up convergence
 	sgd = SGD(lr=args.lr, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 
-	model = Model(inputs=[inputs, labels, input_length, label_length], outputs=loss_out)
-
 	# the loss calc occurs elsewhere, so use a dummy lambda func for the loss
-	model.compile(loss={'ctc': lambda y_true, y_pred: y_pred}, optimizer=sgd)
+	model.compile(loss=losses.ctc(), optimizer=sgd)
 
 	return model
 

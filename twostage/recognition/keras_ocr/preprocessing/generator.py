@@ -148,17 +148,15 @@ class TextGenerator(keras.utils.Sequence):
 
     def compute_targets(self, annotations_group):
         """ Compute target outputs for the network using images and their annotations.
-        """
-        labels = np.ones([self.batch_size, self.max_word_len])
-        input_length = np.zeros([self.batch_size, 1])
-        label_length = np.zeros([self.batch_size, 1])
+        """        
+        labels = np.ones([self.batch_size, self.max_word_len + 2])
 
         for i in range(self.batch_size):
-            labels[i, :] = annotations_group[i]["labels"]
-            input_length[i] = self.image_width // self.downsample_factor - 2
-            label_length[i] = annotations_group[i]["length"]
+            labels[i, :-2] = annotations_group[i]["labels"]
+            labels[-2] = self.image_width // self.downsample_factor - 2
+            labels[-1] = annotations_group[i]["length"]
 
-        return labels, input_length, label_length
+        return labels
 
     def compute_input_output(self, group):
         """ Compute inputs and target outputs for the network.
@@ -171,15 +169,13 @@ class TextGenerator(keras.utils.Sequence):
         image_group, annotations_group = self.preprocess_group(image_group, annotations_group)
 
         # compute network targets
-        labels, input_length, label_length = self.compute_targets(annotations_group)
+        labels = self.compute_targets(annotations_group)
 
         # compute network inputs
         images  = self.compute_inputs(image_group)
 
-        print(images.shape, labels.shape, input_length.shape, label_length.shape)
-
         # dummy data for dummy loss function
-        return [images, labels, input_length, label_length], np.zeros([self.batch_size])
+        return images, labels
 
     def __len__(self):
         """
