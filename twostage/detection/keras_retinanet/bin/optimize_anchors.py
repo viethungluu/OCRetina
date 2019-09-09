@@ -160,7 +160,7 @@ if __name__ == "__main__":
     else:
         seed = np.random.RandomState()
         
-    word_list  = read_word_list(parser.monogram_path)
+    word_list  = read_word_list(args.monogram_path)
     for i in range(4096):
         img, annotations = load_data(word_list, i)
         for anno in annotations['bboxes']:
