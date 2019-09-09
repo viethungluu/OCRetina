@@ -74,7 +74,11 @@ def default_classification_model(
     # reshape output and apply sigmoid
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute')(outputs)
+    
+    # shape B x N x max_word_length
     outputs = keras.layers.Reshape((-1, max_word_length), name='pyramid_classification_reshape')(outputs)
+    
+    # shape B x N x max_word_length
     outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid')(outputs)
 
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
@@ -195,7 +199,7 @@ def __build_model_pyramid(name, model, features):
     Args
         name     : Name of the submodel.
         model    : The submodel to evaluate.
-        features : The FPN features.
+        features : The FPN features (P3, P4, P5, P6, P7).
 
     Returns
         A tensor containing the response from the submodel on the FPN features.
@@ -208,7 +212,7 @@ def __build_pyramid(models, features):
 
     Args
         models   : List of sumodels to run on each pyramid level (by default only regression, classifcation).
-        features : The FPN features.
+        features : The FPN features (P3, P4, P5, P6, P7)
 
     Returns
         A list of tensors, one for each submodel.

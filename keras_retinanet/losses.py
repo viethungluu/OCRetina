@@ -28,22 +28,26 @@ def ctc(alpha=0.25, gamma=2.0):
     """
     def _ctc(y_true, y_pred):
         labels         = y_true[:, :, :-2] # B x N x num_classes
+        label_length   = y_true[:, :, -2] # B x N x 1
         anchor_state   = y_true[:, :, -1]  # B x N x 1 (-1 for ignore, 0 for background, 1 for object)
+        
         classification = y_pred # B x N x num_classes
+
+        # free up some memory
+        del y_true
+
+        # initial input length tensor
+        # input_length   = keras.backend.zeros_like(label_length)
 
         # filter out "ignore" anchors
         indices        = backend.where(keras.backend.not_equal(anchor_state, -1))
         
         labels         = backend.gather_nd(labels, indices)
         classification = backend.gather_nd(classification, indices)
+        label_length   = backend.gather_nd(label_length, indices)
 
-        # compute the focal loss
-        alpha_factor = keras.backend.ones_like(labels) * alpha
-        alpha_factor = backend.where(keras.backend.equal(labels, 1), alpha_factor, 1 - alpha_factor)
-        focal_weight = backend.where(keras.backend.equal(labels, 1), 1 - classification, classification)
-        focal_weight = alpha_factor * focal_weight ** gamma
-
-        cls_loss     = focal_weight * keras.backend.binary_crossentropy(labels, classification)
+        # compute the ctc loss
+        cls_loss     = keras.backend.binary_crossentropy(labels, classification)
 
         # compute the normalizer: the number of positive anchors
         normalizer = backend.where(keras.backend.equal(anchor_state, 1))
