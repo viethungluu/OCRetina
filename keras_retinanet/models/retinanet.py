@@ -51,8 +51,11 @@ def default_classification_model(
         inputs  = keras.layers.Input(shape=(pyramid_feature_size, None, None))
     else:
         inputs  = keras.layers.Input(shape=(None, None, pyramid_feature_size))
-    
+
     outputs = inputs
+
+    # tranpose data to Batch x Width x Height x Channel as input for RNN
+    inputs = keras.layers.Permute((2, 1, 3))(outputs)
     for i in range(4):
         outputs = keras.layers.Conv2D(
             filters=classification_feature_size,
