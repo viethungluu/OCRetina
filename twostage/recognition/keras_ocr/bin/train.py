@@ -114,7 +114,7 @@ def build_model(args):
 	loss_out = Lambda(ctc_lambda_func, output_shape=(1,), name='ctc')([y_pred, labels, input_length, label_length])
 
 	# clipnorm seems to speeds up convergence
-	sgd = SGD(lr=0.02, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
+	sgd = SGD(lr=args.lr, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
 
 	model = Model(inputs=[inputs, labels, input_length, label_length], outputs=loss_out)
 
