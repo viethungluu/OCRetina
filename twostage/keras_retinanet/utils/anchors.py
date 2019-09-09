@@ -54,7 +54,7 @@ def anchor_targets_bbox(
     anchors,
     image_group,
     annotations_group,
-    max_word_length,
+    num_classes,
     negative_overlap=0.4,
     positive_overlap=0.5
 ):
@@ -64,7 +64,7 @@ def anchor_targets_bbox(
         anchors: np.array of annotations of shape (N, 4) for (x1, y1, x2, y2).
         image_group: List of BGR images.
         annotations_group: List of annotations (np.array of shape (N, 5) for (x1, y1, x2, y2, label)).
-        max_word_length: Maximum word length.
+        num_classes: Number of classes to predict.
         mask_shape: If the image is padded with zeros, mask_shape can be used to mark the relevant part of the image.
         negative_overlap: IoU overlap for negative anchors (all anchors with overlap < negative_overlap are negative).
         positive_overlap: IoU overlap or positive anchors (all anchors with overlap > positive_overlap are positive).
@@ -85,10 +85,8 @@ def anchor_targets_bbox(
 
     batch_size = len(image_group)
 
-    # labels_batch contain y_true (4), anchor_stage(1)
     regression_batch  = np.zeros((batch_size, anchors.shape[0], 4 + 1), dtype=keras.backend.floatx())
-    # labels_batch contain y_true (max_word_length), label_length (1), anchor_stage(1)
-    labels_batch      = np.zeros((batch_size, anchors.shape[0], max_word_length + 2), dtype=keras.backend.floatx())
+    labels_batch      = np.zeros((batch_size, anchors.shape[0], num_classes + 1), dtype=keras.backend.floatx())
 
     # compute labels and regression targets
     for index, (image, annotations) in enumerate(zip(image_group, annotations_group)):
@@ -103,8 +101,7 @@ def anchor_targets_bbox(
             regression_batch[index, positive_indices, -1] = 1
 
             # compute target class labels
-            labels_batch[index, positive_indices, :-1] = \
-                    annotations['labels'][argmax_overlaps_inds[positive_indices]]
+            labels_batch[index, positive_indices, annotations['labels'][argmax_overlaps_inds[positive_indices]].astype(int)] = 1
 
             regression_batch[index, :, :-1] = bbox_transform(anchors, annotations['bboxes'][argmax_overlaps_inds, :])
 
@@ -129,7 +126,7 @@ def compute_gt_annotations(
 
     Args
         anchors: np.array of annotations of shape (N, 4) for (x1, y1, x2, y2).
-        annotations: np.array of shape (K, 5) for (x1, y1, x2, y2, label).
+        annotations: np.array of shape (N, 5) for (x1, y1, x2, y2, label).
         negative_overlap: IoU overlap for negative anchors (all anchors with overlap < negative_overlap are negative).
         positive_overlap: IoU overlap or positive anchors (all anchors with overlap > positive_overlap are positive).
 
@@ -139,10 +136,8 @@ def compute_gt_annotations(
         argmax_overlaps_inds: ordered overlaps indices
     """
 
-    overlaps = compute_overlap(anchors.astype(np.float64), annotations.astype(np.float64)) # N x K
-    
+    overlaps = compute_overlap(anchors.astype(np.float64), annotations.astype(np.float64))
     argmax_overlaps_inds = np.argmax(overlaps, axis=1)
-
     max_overlaps = overlaps[np.arange(overlaps.shape[0]), argmax_overlaps_inds]
 
     # assign "dont care" labels
