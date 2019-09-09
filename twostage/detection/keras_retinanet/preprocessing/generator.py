@@ -159,7 +159,7 @@ class TextGenerator(keras.utils.Sequence):
         """ Shuffle the dataset
         """
         if self.shuffle_groups:
-            random.shuffle(self.groups)
+            np.random.shuffle(self.groups)
 
     # -----------------------------------------
     def size(self):
