@@ -16,9 +16,9 @@ from .. import params
 
 def word_to_labels(word):
 	if word in params.PUNCTUATION_LIST:
-		return params.PUNCTUATION_CLASS
+		return params.CLASSES["punctuation"]
 	else:
-		return params.ALPHABET_CLASS
+		return params.CLASSES["alphabet"]
 
 """
 Source: https://github.com/keras-team/keras/blob/master/examples/image_ocr.py
