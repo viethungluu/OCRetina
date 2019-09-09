@@ -27,7 +27,7 @@ def get_session():
     config.gpu_options.allow_growth = True
     return tf.Session(config=config)
 
-def draw_detections(image, boxes, scores, labels, color=None, label_to_name=None, score_threshold=0.05):
+def draw_detections(image, boxes, scores, labels, color=(255, 0, 0), label_to_name=None, score_threshold=0.05):
     """ Draws detections in an image.
 
     # Arguments
@@ -45,8 +45,7 @@ def draw_detections(image, boxes, scores, labels, color=None, label_to_name=None
     selection = np.where(scores > 0)[0]
 
     for i in selection:
-        c = color if color is not None else label_color(labels[i])
-        draw_box(image, boxes[i, :], color=c)
+        draw_box(image, boxes[i, :], color=color)
 
 class RetinaNetWrapper(object):
     """docstring for RetinaNetWrapper"""
