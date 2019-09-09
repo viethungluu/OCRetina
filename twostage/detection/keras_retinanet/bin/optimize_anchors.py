@@ -6,11 +6,16 @@ import os
 import numpy as np
 import scipy.optimize
 
+# Allow relative imports when being executed as script.
+if __name__ == "__main__" and __package__ is None:
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+    import keras_retinanet.bin  # noqa: F401
+    __package__ = "keras_retinanet.bin"
+
 from ..utils.compute_overlap import compute_overlap
 from ..utils.anchors import generate_anchors, AnchorParameters, anchors_for_shape
 from ..utils.image import compute_resize_scale
 from ..utils.paint_text import paint_text
-
 
 warnings.simplefilter("ignore")
 
