@@ -14,12 +14,15 @@ Two models are trained independently:
 A RetinaNet model is trained to detect word-level text (i.e. "love", "friend"), punctuations, and space character. The model is trained using image randomly generated. The font face is fixed for the first 19 epochs. After that, the font face is randomly chosen.
 
 Sample randomly-generated data
+
 ![Sample randomly-generated data](/images/data_detection.png)
 
 Test results after 4 epochs
+
 ![Test results after 4 epochs](/images/detection_4.png)
 
 Test results after 19 epochs
+
 ![Test results after 19 epochs](/images/detection_19.png)
 
 [Google Colab Notebook for training detection model](https://drive.google.com/file/d/0B7R3L0qnFcRjcHVGRE9HZHNZeFZ5T0RheVJPdlVlVlJGS0xn/view?usp=sharing)
@@ -28,12 +31,13 @@ Test results after 19 epochs
 A lightweight RNN-based model is trained to recognize text at word level. The model is trained using image randomly generated. The font face is fixed for the first 10 epochs. After that, the font face is randomly chosen.
 
 Sample randomly-generated data
+
 ![Sample randomly-generated data](/images/data_recognition.png)
 
 [Google Colab Notebook for training recognition model](https://colab.research.google.com/drive/1fEPLZh888mu3NWrXaTYCKrCAfYmO-W-N)
 
 ## One-stage OCR system
-**THIS SOLUTIONS IS UNDER DEVELOPMENT. PLEASE TAKE CARE OF YOURSELF USING THIS CODE**
+**THIS SOLUTIONS IS UNDER DEVELOPMENT AND NOT FULLY OPERATED**
 
 One-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)
 
