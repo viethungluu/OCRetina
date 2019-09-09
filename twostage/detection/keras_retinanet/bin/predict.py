@@ -104,7 +104,7 @@ class RetinaNetWrapper(object):
         image_detections = np.concatenate([image_boxes, np.expand_dims(image_scores, axis=1), np.expand_dims(image_labels, axis=1)], axis=1)
 
         if save_path is not None:
-            draw_detections(raw_image, image_boxes, image_scores, image_labels, score_threshold=score_threshold)
+            draw_detections(raw_image, image_boxes, image_scores, image_labels, score_threshold=self.score_threshold)
             cv2.imwrite(os.path.join(save_path, 'detection.png'.format(i)), raw_image)
         
         # copy detections to all_detections
