@@ -99,7 +99,7 @@ def build_model(args):
 	gru_2b 	= GRU(rnn_size, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='gru2_b')(gru1_merged)
 
 	# transforms RNN output to character activations:
-	outputs = Dense(26, kernel_initializer='he_normal', 
+	outputs = Dense(27, kernel_initializer='he_normal', 
 				name='dense2')(concatenate([gru_2, gru_2b]))
 	
 	y_pred 	= Activation('softmax', name='softmax')(outputs)

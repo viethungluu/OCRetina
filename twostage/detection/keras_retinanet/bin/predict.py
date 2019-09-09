@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 
 import keras
+import cv2
 
 # Allow relative imports when being executed as script.
 if __name__ == "__main__" and __package__ is None:
@@ -13,6 +14,27 @@ from .. import models
 from ..utils.config import read_config_file, parse_anchor_parameters
 from ..utils.image import resize_image, preprocess_image
 from .. import params
+
+def draw_detections(image, boxes, scores, labels, color=None, label_to_name=None, score_threshold=0.05):
+    """ Draws detections in an image.
+
+    # Arguments
+        image           : The image to draw on.
+        boxes           : A [N, 4] matrix (x1, y1, x2, y2).
+        scores          : A list of N classification scores.
+        labels          : A list of N labels.
+        color           : The color of the boxes. By default the color from keras_retinanet.utils.colors.label_color will be used.
+        label_to_name   : (optional) Functor for mapping a label to a name.
+        score_threshold : Threshold used for determining what detections to draw.
+    """
+    # selection = np.where(scores > score_threshold)[0]
+
+    # debug
+    selection = np.where(scores > 0)[0]
+
+    for i in selection:
+        c = color if color is not None else label_color(labels[i])
+        draw_box(image, boxes[i, :], color=c)
 
 class RetinaNetWrapper(object):
     """docstring for RetinaNetWrapper"""
@@ -40,7 +62,7 @@ class RetinaNetWrapper(object):
         self.image_max_side  = image_max_side
         self.num_classes     = max(params.CLASSES.values()) + 1
 
-    def predict(self, raw_image):
+    def predict(self, raw_image, save_path=None):
         all_detections = [None for i in range(self.num_classes)]
 
         image        = preprocess_image(raw_image.copy())
@@ -69,6 +91,10 @@ class RetinaNetWrapper(object):
         image_labels     = labels[0, indices[scores_sort]]
         image_detections = np.concatenate([image_boxes, np.expand_dims(image_scores, axis=1), np.expand_dims(image_labels, axis=1)], axis=1)
 
+        if save_path is not None:
+            draw_detections(raw_image, image_boxes, image_scores, image_labels, score_threshold=score_threshold)
+            cv2.imwrite(os.path.join(save_path, 'detection.png'.format(i)), raw_image)
+        
         # copy detections to all_detections
         for label in range(self.num_classes):
             all_detections[label] = image_detections[image_detections[:, -1] == label, :-1]
@@ -79,7 +105,8 @@ def parse_args(args):
     """ Parse the arguments.
     """
     parser     = argparse.ArgumentParser(description='Evaluation script for a RetinaNet network.')
-    parser.add_argument('--model',              help='Path to RetinaNet model.')
+    parser.add_argument('--image-path',       help='Path for image need detections.')
+    parser.add_argument('--model',            help='Path to RetinaNet model.')
     parser.add_argument('--convert-model',    help='Convert the model to an inference model (ie. the input is a training model).', action='store_true')
     parser.add_argument('--backbone',         help='The backbone of the model.', default='resnet50')
     parser.add_argument('--gpu',              help='Id of the GPU to use (as reported by nvidia-smi).')
@@ -125,6 +152,10 @@ def main(args=None):
                              max_detections  = args.max_detections,
                              image_min_side  = args.image_min_side,
                              image_max_side  = args.image_max_side)
+
+    image = cv2.imread(args.image_path)
+    model.predict(image, args.save_path)
+
 
 if __name__ == '__main__':
     main()
