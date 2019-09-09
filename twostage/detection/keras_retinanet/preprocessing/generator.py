@@ -53,8 +53,8 @@ class TextGenerator(keras.utils.Sequence):
         transform_generator = None,
         visual_effect_generator=None,
         batch_size=4,
-        image_width=800,
-        image_height=1333,
+        image_min_side=800,
+        image_max_side=1333,
         transform_parameters=None,
         compute_anchor_targets=anchor_targets_bbox,
         compute_shapes=guess_shapes,
@@ -77,8 +77,8 @@ class TextGenerator(keras.utils.Sequence):
             preprocess_image       : Function handler for preprocessing an image (scaling / normalizing) for passing through a network.
         """
         self.paint_func     = paint_func
-        self.image_width    = image_width
-        self.image_height   = image_height
+        self.image_min_side = image_min_side
+        self.image_max_side = image_max_side
         self.num_images     = num_images
         self.max_string_len = max_string_len
 
@@ -158,10 +158,23 @@ class TextGenerator(keras.utils.Sequence):
         """
         return self.num_images
 
+    def _random_image_shape(self, image_index):
+        np.random.seed(image_index)
+        image_width, image_height = \
+            np.random.randint(self.image_min_side // 1.5, self.image_max_side * 2),\
+            np.random.randint(self.image_min_side // 1.5, self.image_max_side * 2)
+
+        return image_width, image_height
+
+    def _random_image_content(self, image_index):
+        np.random.seed(image_index)
+        return np.random.choice(self.word_list, size=np.random.randint(self.max_string_len // 2, self.max_string_len))
+
     def image_aspect_ratio(self, image_index):
         """ Compute the aspect ratio for an image with image_index.
         """
-        return float(self.image_width) / self.image_height
+        image_width, image_height = self._random_image_shape(image_index)
+        return float(image_width) / image_height
 
     def load_image(self, image_index):
         """ Load an image at the image_index.
@@ -178,15 +191,14 @@ class TextGenerator(keras.utils.Sequence):
     def load_data(self, image_index):
         """ Load image and annotations for an image_index.
         """
-        # if validation generator
-        # set seed number to fix the text for image_index
-        if self.stage == "val":
-            np.random.seed(image_index)
-        words_to_image = np.random.choice(self.word_list, size=np.random.randint(self.max_string_len // 2, self.max_string_len))
+        # set seed number to fix the image shape and its text for image_index
+        
+        image_width, image_height = self._random_image_shape(image_index)
+        words_to_image = self._random_image_content(image_index)
 
         image, annotation = self.paint_func(words_to_image, 
-                                    image_width=self.image_width, 
-                                    image_height=self.image_height)
+                                    image_width=image_width, 
+                                    image_height=image_height)
         
         return image, annotation
 
@@ -287,7 +299,7 @@ class TextGenerator(keras.utils.Sequence):
     def resize_image(self, image):
         """ Resize an image using image_min_side and image_max_side.
         """
-        return resize_image(image, image_width=self.image_width)
+        return resize_image(image, min_side=self.image_min_side, max_side=self.image_max_side)
 
     def preprocess_group_entry(self, image, annotations):
         """ Preprocess image and its annotations.

@@ -1,5 +1,4 @@
 import warnings
-import csv
 import argparse
 import sys
 import os
@@ -7,13 +6,9 @@ import os
 import numpy as np
 import scipy.optimize
 
-from PIL import Image
-import tifffile as tiff
-from compute_overlap import compute_overlap
-
-from keras_retinanet.preprocessing.csv_generator import _open_for_csv
-from keras_retinanet.utils.anchors import generate_anchors, AnchorParameters, anchors_for_shape
-from keras_retinanet.utils.image import compute_resize_scale
+from ..utils.anchors import compute_overlap, generate_anchors, AnchorParameters, anchors_for_shape
+from ..utils.image import compute_resize_scale
+from ..utils.paint_text import paint_text
 
 warnings.simplefilter("ignore")
 
@@ -94,7 +89,8 @@ def average_overlap(values, entries, state, image_shape, mode='focal', ratio_cou
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Optimize RetinaNet anchor configuration')
-    parser.add_argument('annotations', help='Path to CSV file containing annotations for anchor optimization.')
+    parser.add_argument('--monogram-path',    help='Path to file containing monogram words for training')
+    parser.add_argument('--max-string-len',   help='Maximum number of words in each image.', type=int, default=150)
     parser.add_argument('--scales', type=int, help='Number of scales.', default=3)
     parser.add_argument('--ratios', type=int, help='Number of ratios, has to be an odd number.', default=3)
     parser.add_argument('--include-stride', action='store_true',
@@ -105,11 +101,8 @@ if __name__ == "__main__":
                              'Options: focal, avg, ce.')
     parser.add_argument('--popsize', type=int, default=15,
                         help='The total population size multiplier used by differential evolution.')
-    parser.add_argument('--no-resize', help='Disable image resizing.', dest='resize', action='store_false')
-    parser.add_argument('--image-min-side', help='Rescale the image so the smallest side is min_side.', type=int,
-                        default=800)
-    parser.add_argument('--image-max-side', help='Rescale the image if the largest side is larger than max_side.',
-                        type=int, default=1333)
+    parser.add_argument('--image-width',      help='Rescale the image so the smallest side is min_side.', type=int, default=800)
+    parser.add_argument('--image-height',     help='Rescale the image if the largest side is larger than max_side.', type=int, default=1333)
     parser.add_argument('--seed', type=int, help='Seed value to use for differential evolution.')
     args = parser.parse_args()
 
@@ -125,7 +118,9 @@ if __name__ == "__main__":
     else:
         seed = np.random.RandomState()
 
-    print('Loading object dimensions.')
+    for i in range(10000):
+        
+
     
     data_dir = os.path.dirname(args.annotations)
     with _open_for_csv(args.annotations) as file:

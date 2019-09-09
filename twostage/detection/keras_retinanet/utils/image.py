@@ -177,17 +177,18 @@ def compute_resize_scale(image_shape, min_side=800, max_side=1333):
     return scale
 
 
-def resize_image(img, image_width=800):
-    """ Resize an image such that the width is constrained.
+def resize_image(img, min_side=800, max_side=1333):
+    """ Resize an image such that the size is constrained to min_side and max_side.
 
     Args
-        image_width: Resize image to fixed image_width, image_height can be variable
+        min_side: The image's min side will be equal to min_side after resizing.
+        max_side: If after resizing the image's max side is above max_side, resize until the max side is equal to max_side.
 
     Returns
         A resized image.
     """
     # compute scale to resize the image
-    scale = float(image_width) / img.shape[1]
+    scale = compute_resize_scale(img.shape, min_side=min_side, max_side=max_side)
 
     # resize the image with the computed scale
     img = cv2.resize(img, None, fx=scale, fy=scale)
