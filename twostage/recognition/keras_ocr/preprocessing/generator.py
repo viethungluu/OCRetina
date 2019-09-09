@@ -106,7 +106,7 @@ class TextGenerator(keras.utils.Sequence):
         image = self.preprocess_image(image)
 
         # resize image
-        image, image_scale = self.resize_image(image)
+        image = self.resize_image(image)
 
         # convert to the wanted keras floatx
         image = keras.backend.cast_to_floatx(image)
