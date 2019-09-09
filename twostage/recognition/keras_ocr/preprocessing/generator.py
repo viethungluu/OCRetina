@@ -61,7 +61,7 @@ class TextGenerator(keras.utils.Sequence):
         else:
             word_list = word_list[int(len(word_list) * 0.8) :]
 
-        return np.array(word_list)
+        return word_list
 
     def group_images(self):
         """ Order the images according to self.order and makes groups of self.batch_size.

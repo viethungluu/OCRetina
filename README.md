@@ -28,7 +28,7 @@ Test results after 19 epochs
 [Google Colab Notebook for training detection model](https://drive.google.com/file/d/0B7R3L0qnFcRjcHVGRE9HZHNZeFZ5T0RheVJPdlVlVlJGS0xn/view?usp=sharing)
 
 ### Text recognition model
-A lightweight RNN-based model is trained to recognize text at word level. The model is trained using image randomly generated. The font face is fixed for the first 10 epochs. After that, the font face is randomly chosen.
+A lightweight RNN-based model is trained to recognize text at word level using CTC loss. The model is trained using image randomly generated.
 
 Sample randomly-generated data
 
@@ -37,7 +37,7 @@ Sample randomly-generated data
 [Google Colab Notebook for training recognition model](https://colab.research.google.com/drive/1fEPLZh888mu3NWrXaTYCKrCAfYmO-W-N)
 
 ### Existing problems
-* While the input shape for detection model can be variable, the input shape for recognition must be fixed. This is due to the limitation of tf.dynamic_rnn which expects a fully-defined feature shape during construction. In this solution, the image is scaled to 128 x 62 (width x height) before feeding to recognition model.
+* While the input shape for detection model can be variable, the input shape for recognition must be fixed. This is due to the limitation of tf.dynamic_rnn which expects a fully-defined feature shape during construction. In this solution, the image is scaled to 128 x 64 (width x height) before feeding to recognition model.
 
 ## One-stage OCR system
 **THIS SOLUTIONS IS UNDER DEVELOPMENT AND NOT FULLY OPERATED**
