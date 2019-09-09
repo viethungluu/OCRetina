@@ -34,13 +34,6 @@ def makedirs(path):
 		if not os.path.isdir(path):
 			raise
 
-def get_session():
-	""" Construct a modified tf session.
-	"""
-	config = tf.ConfigProto()
-	config.gpu_options.allow_growth = True
-	return tf.Session(config=config)
-
 def parse_args(args):
 	""" Parse the arguments.
 	"""
@@ -131,8 +124,6 @@ def main(args=None):
 	if args is None:
 		args = sys.argv[1:]
 	args = parse_args(args)
-
-	backend.tensorflow_backend.set_session(get_session())
 
 	train_generator = TextGenerator(
 		args.monogram_path,
