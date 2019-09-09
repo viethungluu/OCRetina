@@ -52,7 +52,7 @@ def focal(alpha=0.25, gamma=2.0):
 
         return keras.backend.sum(cls_loss) / normalizer
 
-    return _ctc
+    return _focal
 
 def smooth_l1(sigma=3.0):
     """ Create a smooth L1 loss functor.
