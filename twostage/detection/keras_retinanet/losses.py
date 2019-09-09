@@ -37,7 +37,6 @@ def focal(alpha=0.25, gamma=2.0):
 
         # filter out "ignore" anchors
         indices        = backend.where(keras.backend.not_equal(anchor_state, -1))
-        
         labels         = backend.gather_nd(labels, indices)
         classification = backend.gather_nd(classification, indices)
 

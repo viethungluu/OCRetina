@@ -8,7 +8,7 @@ from ..utils.image import (
     preprocess_image,
     resize_image,
 )
-from ..utils.paint_text import paint_text
+from ..utils.dataset import paint_text
 
 SEED_NUMBER = 28
 
@@ -23,25 +23,15 @@ class TextGenerator(keras.utils.Sequence):
         batch_size=128,
         max_word_len=32,
         image_width=128,
+        downsample_factor=2,
         preprocess_image=preprocess_image,
     ):
-        """ Initialize Generator object.
-
-        Args
-            transform_generator    : A generator used to randomly transform images and annotations.
-            batch_size             : The size of the batches to generate.
-            shuffle_groups         : If True, shuffles the groups each epoch.
-            image_min_side         : After resizing the minimum side of an image is equal to image_min_side.
-            image_max_side         : If after resizing the maximum side is larger than image_max_side, scales down further so that the max side is equal to image_max_side.
-            transform_parameters   : The transform parameters used for data augmentation.
-            compute_anchor_targets : Function handler for computing the targets of anchors for an image and its annotations.
-            compute_shapes         : Function handler for computing the shapes of the pyramid for a given input.
-            preprocess_image       : Function handler for preprocessing an image (scaling / normalizing) for passing through a network.
-        """
+        """ Initialize Generator object."""
         self.paint_func         = paint_func
         self.preprocess_image   = preprocess_image
 
-        self.image_width    = image_width
+        self.image_width        = image_width
+        self.downsample_factor  = downsample_factor
 
         self.max_word_len   = max_word_len
 
@@ -94,7 +84,6 @@ class TextGenerator(keras.utils.Sequence):
         
         return image, annotation
 
-    # --------------------------------------------
     def load_data_group(self, group):
         """ Load image and annotations for all data in group.
         """
@@ -132,7 +121,7 @@ class TextGenerator(keras.utils.Sequence):
 
         return image_group, annotations_group
 
-    def compute_inputs(self, image_group, num_anchors):
+    def compute_inputs(self, image_group):
         """ Compute inputs for the network using an image_group.
         """
         # get the max image shape
@@ -145,26 +134,28 @@ class TextGenerator(keras.utils.Sequence):
         for image_index, image in enumerate(image_group):
             image_batch[image_index, :image.shape[0], :image.shape[1], :image.shape[2]] = image
 
+        # transpose shape to Batch x W x H x C
+        image_batch = image_batch.transpose((0, 2, 1, 3))
+
+        # tranpose image channel if needed
         if keras.backend.image_data_format() == 'channels_first':
             image_batch = image_batch.transpose((0, 3, 1, 2))
 
         return image_batch
 
-    def compute_targets(self, image_group, annotations_group):
+    def compute_targets(self, annotations_group):
         """ Compute target outputs for the network using images and their annotations.
         """
-        # get the max image shape
-        max_shape = tuple(max(image.shape[x] for image in image_group) for x in range(3))
-        anchors   = self.generate_anchors(max_shape)
+        labels = np.ones([self.batch_size, self.max_word_len])
+        input_length = np.zeros([self.batch_size, 1])
+        label_length = np.zeros([self.batch_size, 1])
 
-        batches = self.compute_anchor_targets(
-            anchors,
-            image_group,
-            annotations_group,
-            self.max_word_len
-        )
+        for i in range(self.batch_size):
+            labels[i, :] = annotations_group[i]["labels"]
+            input_length[i] = self.image_width // self.downsample_factor - 2
+            label_length[i] = annotations_group[i]["length"]
 
-        return list(batches)
+        return labels, input_length, label_length
 
     def compute_input_output(self, group):
         """ Compute inputs and target outputs for the network.
@@ -177,12 +168,13 @@ class TextGenerator(keras.utils.Sequence):
         image_group, annotations_group = self.preprocess_group(image_group, annotations_group)
 
         # compute network targets
-        targets = self.compute_targets(image_group, annotations_group)
+        labels, input_length, label_length = self.compute_targets(annotations_group)
 
         # compute network inputs
-        inputs  = self.compute_inputs(image_group, targets[0].shape[1])
+        images  = self.compute_inputs(image_group)
 
-        return inputs, targets
+        # dummy data for dummy loss function
+        return [images, labels, input_length, label_length], np.zeros([self.batch_size])
 
     def __len__(self):
         """
