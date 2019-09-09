@@ -56,7 +56,7 @@ def load_data(word_list, image_index):
     # set seed number to fix the image shape and its text for image_index
     
     image_width, image_height   = random_image_shape(image_index)
-    words_to_image              = random_image_content(image_index)
+    words_to_image              = random_image_content(word_list, image_index)
 
     image, annotation           = paint_text(words_to_image, image_width=image_width, image_height=image_height)
 
