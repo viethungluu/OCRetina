@@ -109,9 +109,11 @@ if __name__ == '__main__':
 	image, annotations 	= paint_text(test_phrase, 800, 1333)
 
 	for label, (x1, y1, x2, y2) in zip(annotations['labels'], annotations['bboxes']):
-		cv2.putText(image, str(int(label)), (int(x1), int(y1)), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 0), 1)
+		# cv2.putText(image, str(int(label)), (int(x1), int(y1)), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 0), 1)
 		cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 1)
 
-	cv2.imshow('image', image)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+	# cv2.imshow('image', image)
+	# cv2.waitKey(0)
+	# cv2.destroyAllWindows()
+
+	cv2.imwrite("data_gen.png", image)
