@@ -78,7 +78,7 @@ def default_classification_model(
 
 
     # cuts down input size going into RNN:
-    outputs = keras.layers.Dense(params.TIME_DENSE_SIZE, activation=act, name='dense1')(outputs)
+    outputs = keras.layers.Dense(params.TIME_DENSE_SIZE, activation='relu', name='dense1')(outputs)
 
     # Two layers of bidirectional GRUs
     # GRU seems to work as well, if not better than LSTM:
