@@ -154,13 +154,7 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
         callbacks.append(csv_logger)
 
     if args.evaluation and validation_generator:
-        if args.dataset_type == 'coco':
-            from ..callbacks.coco import CocoEval
-
-            # use prediction model for evaluation
-            evaluation = CocoEval(validation_generator, tensorboard=tensorboard_callback)
-        else:
-            evaluation = Evaluate(validation_generator, save_path=args.save_path, tensorboard=tensorboard_callback, csv_logger=os.path.join(args.logger_dir, 'eval.csv'), weighted_average=args.weighted_average)
+        evaluation = Evaluate(validation_generator, save_path=args.save_path, tensorboard=tensorboard_callback, csv_logger=os.path.join(args.logger_dir, 'eval.csv'), weighted_average=args.weighted_average)
         evaluation = RedirectModel(evaluation, prediction_model)
         callbacks.append(evaluation)
 
