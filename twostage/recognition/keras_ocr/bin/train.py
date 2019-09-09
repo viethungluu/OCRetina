@@ -132,7 +132,6 @@ def main(args=None):
 		args = sys.argv[1:]
 	args = parse_args(args)
 
-	os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 	backend.tensorflow_backend.set_session(get_session())
 
 	train_generator = TextGenerator(
