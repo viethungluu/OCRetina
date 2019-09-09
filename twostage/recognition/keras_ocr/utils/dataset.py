@@ -88,12 +88,12 @@ def paint_text(word, image_width, image_height, max_word_len=16, font_scale=1, t
 	return image, annotations
 
 if __name__ == '__main__':
-	test_phrases 	= ["qwertyuiopasdfghjklzxcvbnmmakeoqi"]
+	test_phrases 	= ["love"]
 
 	image, label 	= paint_text(np.random.choice(test_phrases), 128, 16)
 
-	cv2.imshow('image', image)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+	# cv2.imshow('image', image)
+	# cv2.waitKey(0)
+	# cv2.destroyAllWindows()
 
 	cv2.imwrite("image.png", image)
