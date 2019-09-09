@@ -14,24 +14,6 @@ from ..utils.config import read_config_file, parse_anchor_parameters
 from ..utils.image import resize_image, preprocess_image
 from .. import params
 
-def parse_args(args):
-    """ Parse the arguments.
-    """
-    parser     = argparse.ArgumentParser(description='Evaluation script for a RetinaNet network.')
-    parser.add_argument('--model',              help='Path to RetinaNet model.')
-    parser.add_argument('--convert-model',    help='Convert the model to an inference model (ie. the input is a training model).', action='store_true')
-    parser.add_argument('--backbone',         help='The backbone of the model.', default='resnet50')
-    parser.add_argument('--gpu',              help='Id of the GPU to use (as reported by nvidia-smi).')
-    parser.add_argument('--score-threshold',  help='Threshold on score to filter detections with (defaults to 0.05).', default=0.05, type=float)
-    parser.add_argument('--max-detections',   help='Max Detections per image (defaults to 100).', default=100, type=int)
-    parser.add_argument('--save-path',        help='Path for saving images with detections (doesn\'t work for COCO).')
-    parser.add_argument('--image-min-side',   help='Rescale the image so the smallest side is min_side.', type=int, default=800)
-    parser.add_argument('--image-max-side',   help='Rescale the image if the largest side is larger than max_side.', type=int, default=1333)
-    parser.add_argument('--config',           help='Path to a configuration parameters .ini file (only used with --convert-model).')
-
-    return parser.parse_args(args)
-
-
 class RetinaNetWrapper(object):
     """docstring for RetinaNetWrapper"""
     def __init__(self, 
@@ -62,7 +44,7 @@ class RetinaNetWrapper(object):
         all_detections = [None for i in range(self.num_classes)]
 
         image        = preprocess_image(raw_image.copy())
-        image, scale = resize_image(image)
+        image, scale = resize_image(image, min_side=self.image_min_side, max_side=self.image_max_side)
 
         if keras.backend.image_data_format() == 'channels_first':
             image = image.transpose((2, 0, 1))
@@ -73,13 +55,13 @@ class RetinaNetWrapper(object):
         boxes /= scale
 
         # select indices which have a score above the threshold
-        indices = np.where(scores[0, :] > score_threshold)[0]
+        indices = np.where(scores[0, :] > self.score_threshold)[0]
 
         # select those scores
         scores = scores[0][indices]
 
         # find the order with which to sort the scores
-        scores_sort = np.argsort(-scores)[:max_detections]
+        scores_sort = np.argsort(-scores)[:self.max_detections]
 
         # select detections
         image_boxes      = boxes[0, indices[scores_sort], :]
@@ -92,6 +74,23 @@ class RetinaNetWrapper(object):
             all_detections[label] = image_detections[image_detections[:, -1] == label, :-1]
 
         return all_detections
+
+def parse_args(args):
+    """ Parse the arguments.
+    """
+    parser     = argparse.ArgumentParser(description='Evaluation script for a RetinaNet network.')
+    parser.add_argument('--model',              help='Path to RetinaNet model.')
+    parser.add_argument('--convert-model',    help='Convert the model to an inference model (ie. the input is a training model).', action='store_true')
+    parser.add_argument('--backbone',         help='The backbone of the model.', default='resnet50')
+    parser.add_argument('--gpu',              help='Id of the GPU to use (as reported by nvidia-smi).')
+    parser.add_argument('--score-threshold',  help='Threshold on score to filter detections with (defaults to 0.05).', default=0.05, type=float)
+    parser.add_argument('--max-detections',   help='Max Detections per image (defaults to 100).', default=100, type=int)
+    parser.add_argument('--save-path',        help='Path for saving images with detections (doesn\'t work for COCO).')
+    parser.add_argument('--image-min-side',   help='Rescale the image so the smallest side is min_side.', type=int, default=800)
+    parser.add_argument('--image-max-side',   help='Rescale the image if the largest side is larger than max_side.', type=int, default=1333)
+    parser.add_argument('--config',           help='Path to a configuration parameters .ini file (only used with --convert-model).')
+
+    return parser.parse_args(args)
 
 def main(args=None):
     # parse arguments
