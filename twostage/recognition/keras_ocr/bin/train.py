@@ -1,6 +1,7 @@
 import os
 import argparse
 
+import keras
 from keras import backend as K
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers import Input, Dense, Activation
@@ -45,9 +46,6 @@ def parse_args(args):
 	"""
 	parser     = argparse.ArgumentParser(description='Simple training script for training a RetinaNet network.')
 
-	def csv_list(string):
-	    return string.split(',')
-
 	group = parser.add_mutually_exclusive_group()
 	group.add_argument('--snapshot',          help='Resume training from a snapshot.')
 
@@ -60,10 +58,9 @@ def parse_args(args):
 	parser.add_argument('--downsample-factor',help='Size of the batches.', default=2, type=int)
 
 	parser.add_argument('--snapshot-path',    help='Path to store snapshots of models during training (defaults to \'./snapshots\')', default='./snapshots')
-	parser.add_argument('--logger-dir',       help='Log directory for Tensorboard output', default='./logs')
 	parser.add_argument('--image-width',   	  help='Rescale the image so the width is image-width.', type=int, default=128)
 
-    return check_args(parser.parse_args(args))
+	return check_args(parser.parse_args(args))
 
 def build_model(args):
 	conv_filters = 16
@@ -136,7 +133,7 @@ def main(args=None):
 	args = parse_args(args)
 
 	os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-    keras.backend.tensorflow_backend.set_session(get_session())
+	backend.tensorflow_backend.set_session(get_session())
 
 	train_generator = TextGenerator(
 		args.monogram_path,
