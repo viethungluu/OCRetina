@@ -16,7 +16,7 @@ Two models are trained independently:
 Note that both models are trained using text image generated from a same vocabulary file.
 
 ## One-stage OCR system
-**THIS SOLUTIONS IS UNDER DEVELOPMENT**
+**THIS SOLUTIONS IS UNDER DEVELOPMENT**. Please take care of yourself using this code.
 
 One-stage architecture for text detection and recognition in images. Image is adapted from Rosetta's paper (Sorry I'm not good at drawing)
 
