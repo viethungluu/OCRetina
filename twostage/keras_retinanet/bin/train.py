@@ -244,7 +244,6 @@ def create_generators(args, preprocess_image):
     validation_generator = TextGenerator(
         args.monogram_path,
         max_string_len=args.max_string_len,
-        shuffle_groups=False,
         **common_args
     )
 
