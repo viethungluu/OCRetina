@@ -159,6 +159,7 @@ def main(args=None):
 		verbose=1,
 		save_best_only=True,
 		monitor="val_loss",
+		save_weights_only=True,
 	)
 
 	return model.fit_generator(
