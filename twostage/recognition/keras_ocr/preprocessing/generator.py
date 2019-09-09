@@ -153,8 +153,8 @@ class TextGenerator(keras.utils.Sequence):
 
         for i in range(self.batch_size):
             labels[i, :-2] = annotations_group[i]["labels"]
-            labels[-2] = self.image_width // self.downsample_factor - 2
-            labels[-1] = annotations_group[i]["length"]
+            labels[i, -2] = self.image_width // self.downsample_factor - 2
+            labels[i, -1] = annotations_group[i]["length"]
 
         return labels
 
