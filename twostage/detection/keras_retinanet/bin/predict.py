@@ -5,6 +5,8 @@ import numpy as np
 import argparse
 
 import keras
+import tensorflow as tf
+
 import cv2
 
 # Allow relative imports when being executed as script.
@@ -24,7 +26,7 @@ def get_session():
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     return tf.Session(config=config)
-    
+
 def draw_detections(image, boxes, scores, labels, color=None, label_to_name=None, score_threshold=0.05):
     """ Draws detections in an image.
 
