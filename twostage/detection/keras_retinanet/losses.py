@@ -35,15 +35,11 @@ def focal(alpha=0.25, gamma=2.0):
         # free up some memory
         del y_true
 
-        # initial input length tensor
-        # input_length   = keras.backend.zeros_like(label_length)
-
         # filter out "ignore" anchors
         indices        = backend.where(keras.backend.not_equal(anchor_state, -1))
         
         labels         = backend.gather_nd(labels, indices)
         classification = backend.gather_nd(classification, indices)
-        label_length   = backend.gather_nd(label_length, indices)
 
         # compute the ctc loss
         cls_loss     = keras.backend.binary_crossentropy(labels, classification)
