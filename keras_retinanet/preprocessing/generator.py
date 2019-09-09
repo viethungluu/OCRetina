@@ -308,6 +308,7 @@ class TextGenerator(keras.utils.Sequence):
         anchor_params = None
         if self.config and 'anchor_parameters' in self.config:
             anchor_params = parse_anchor_parameters(self.config)
+        
         return anchors_for_shape(image_shape, anchor_params=anchor_params, shapes_callback=self.compute_shapes)
 
     def compute_targets(self, image_group, annotations_group):

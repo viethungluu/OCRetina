@@ -55,7 +55,7 @@ def default_classification_model(
     outputs = inputs
 
     # tranpose data to Batch x Width x Height x Channel as input for RNN
-    inputs = keras.layers.Permute((2, 1, 3))(outputs)
+    outputs = keras.layers.Permute((2, 1, 3))(outputs)
     for i in range(4):
         outputs = keras.layers.Conv2D(
             filters=classification_feature_size,
@@ -254,7 +254,7 @@ def retinanet(
     num_anchors             = None,
     create_pyramid_features = __create_pyramid_features,
     submodels               = None,
-    name                    = 'retinanet'
+    name                    = 'retinanet',
 ):
     """ Construct a RetinaNet model on top of a backbone.
 
