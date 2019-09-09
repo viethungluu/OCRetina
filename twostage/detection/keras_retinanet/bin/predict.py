@@ -84,7 +84,7 @@ class RetinaNetWrapper(object):
             image = image.transpose((2, 0, 1))
 
         # run network
-        boxes, scores, labels = model.predict_on_batch(np.expand_dims(image, axis=0))[:3]
+        boxes, scores, labels = self.model.predict_on_batch(np.expand_dims(image, axis=0))[:3]
         # correct boxes for image scale
         boxes /= scale
 
