@@ -138,14 +138,27 @@ def main(args=None):
 		downsample_factor=args.downsample_factor,
 	)
 
+	val_generator = TextGenerator(
+		args.monogram_path,
+		batch_size=args.batch_size,
+		max_word_len=args.max_word_len,
+		image_width=args.image_width,
+		image_height=args.image_height,
+		downsample_factor=args.downsample_factor,
+		stage="val",
+	)
+
 	model = build_model(args)
 
+	makedirs(args.snapshot_path)
 	checkpoint = keras.callbacks.ModelCheckpoint(
 		os.path.join(
 			args.snapshot_path,
-			'recognition_{{epoch:02d}}.h5'
+			'recognition_{{epoch:02d}}.h5'.format()
 		),
 		verbose=1,
+		save_best_only=True,
+		monitor="val_loss",
 	)
 
 	return model.fit_generator(
@@ -153,7 +166,8 @@ def main(args=None):
 		steps_per_epoch=len(train_generator) // args.batch_size,
 		epochs=args.epochs,
 		verbose=1,
-		callbacks=[checkpoint]
+		callbacks=[checkpoint],
+		validation_data=validation_generator
 	)
 	
 

@@ -26,6 +26,7 @@ class TextGenerator(keras.utils.Sequence):
         image_height=64,
         downsample_factor=4,
         preprocess_image=preprocess_image,
+        stage="train",
     ):
         """ Initialize Generator object."""
         self.paint_func         = paint_func
@@ -38,9 +39,11 @@ class TextGenerator(keras.utils.Sequence):
         self.max_word_len   = max_word_len
 
         self.batch_size     = int(batch_size)
+        self.stage          = stage
         
         self.word_list      = self.read_word_list(word_file)
         print("Number of words", len(self.word_list))
+
 
         # Define groups
         self.group_images()
@@ -52,6 +55,12 @@ class TextGenerator(keras.utils.Sequence):
             for line in f:
                 word = line.strip()
                 word_list.append(word)
+        
+        if self.stage = "train":
+            word_list = word_list[:int(len(word_list) * 0.8)]
+        else:
+            word_list = word_list[int(len(word_list) * 0.8) :]
+
         return np.array(word_list)
 
     def group_images(self):
