@@ -256,7 +256,7 @@ class TextGenerator(keras.utils.Sequence):
     def resize_image(self, image):
         """ Resize an image using image_min_side and image_max_side.
         """
-        return resize_image(image, min_side=self.image_width, max_side=self.image_height)
+        return resize_image(image, image_width=self.image_width)
 
     def preprocess_group_entry(self, image, annotations):
         """ Preprocess image and its annotations.
