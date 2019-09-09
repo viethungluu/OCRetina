@@ -103,7 +103,7 @@ def build_model(args):
 				name='dense2')(concatenate([gru_2, gru_2b]))
 	
 	y_pred 	= Activation('softmax', name='softmax')(outputs)
-	Model(inputs=input_data, outputs=y_pred).summary()
+	Model(inputs=inputs, outputs=y_pred).summary()
 
 	labels 		 = Input(name='the_labels', shape=[args.max_word_len], dtype='float32')
 	input_length = Input(name='input_length', shape=[1], dtype='int64')
