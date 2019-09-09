@@ -5,6 +5,7 @@ import os
 
 import numpy as np
 import scipy.optimize
+import codecs
 
 # Allow relative imports when being executed as script.
 if __name__ == "__main__" and __package__ is None:
