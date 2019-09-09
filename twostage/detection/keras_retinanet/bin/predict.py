@@ -38,7 +38,7 @@ def draw_box(image, box, color, thickness=2):
     """
     b = np.array(box).astype(int)
     cv2.rectangle(image, (b[0], b[1]), (b[2], b[3]), color, thickness, cv2.LINE_AA)
-    
+
 def draw_detections(image, boxes, scores, labels, color=(255, 0, 0), label_to_name=None, score_threshold=0.05):
     """ Draws detections in an image.
 
@@ -116,7 +116,7 @@ class RetinaNetWrapper(object):
 
         if save_path is not None:
             draw_detections(raw_image, image_boxes, image_scores, image_labels, score_threshold=self.score_threshold)
-            cv2.imwrite(os.path.join(save_path, 'detection.png'.format(i)), raw_image)
+            cv2.imwrite(os.path.join(save_path, 'detection.png'), raw_image)
         
         # copy detections to all_detections
         for label in range(self.num_classes):
