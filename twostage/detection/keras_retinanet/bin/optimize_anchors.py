@@ -6,9 +6,11 @@ import os
 import numpy as np
 import scipy.optimize
 
-from ..utils.anchors import compute_overlap, generate_anchors, AnchorParameters, anchors_for_shape
+from ..utils.compute_overlap import compute_overlap
+from ..utils.anchors import generate_anchors, AnchorParameters, anchors_for_shape
 from ..utils.image import compute_resize_scale
 from ..utils.paint_text import paint_text
+
 
 warnings.simplefilter("ignore")
 
