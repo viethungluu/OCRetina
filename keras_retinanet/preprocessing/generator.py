@@ -265,7 +265,7 @@ class TextGenerator(keras.utils.Sequence):
         image = self.preprocess_image(image)
 
         # resize image
-        image, image_scale = self.resize_image(image, self.image_width)
+        image, image_scale = self.resize_image(image)
 
         # apply resizing to annotations too
         annotations['bboxes'] *= image_scale
