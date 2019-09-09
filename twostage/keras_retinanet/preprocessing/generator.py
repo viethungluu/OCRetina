@@ -353,7 +353,7 @@ class TextGenerator(keras.utils.Sequence):
             anchors,
             image_group,
             annotations_group,
-            self.num_classes
+            self.num_classes()
         )
 
         return list(batches)
