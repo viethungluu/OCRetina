@@ -111,8 +111,7 @@ def build_model(args):
 	label_length 	= Input(name='label_length', shape=[1], dtype='int64')
 	# Keras doesn't currently support loss funcs with extra parameters
 	# so CTC loss is implemented in a lambda layer
-	loss_out = Lambda(losses.ctc_lambda_func, output_shape=(1,), name='ctc')
-				([y_pred, labels, input_length, label_length])
+	loss_out = Lambda(losses.ctc_lambda_func, output_shape=(1,), name='ctc')([y_pred, labels, input_length, label_length])
 
 	# clipnorm seems to speeds up convergence
 	sgd = SGD(lr=args.lr, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=5)
