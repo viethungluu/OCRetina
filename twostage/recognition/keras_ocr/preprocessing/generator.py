@@ -92,8 +92,11 @@ class TextGenerator(keras.utils.Sequence):
         """ Load image and annotations for an image_index.
         """
         word = self.word_list[image_index]
-        if np.random.rand() >= 0.5:
+        ran = np.random.rand()
+        if ran <= 0.3:
             word = word.upper()
+        elif ran <= 0.6:
+            word = word.title()
 
         image, annotation = self.paint_func(word, 
                                             image_width=self.image_width,
