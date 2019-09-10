@@ -174,7 +174,7 @@ def main(args=None):
     all_detections = model.predict(image, args.save_path)
 
     import csv
-    with open('detections.csv', mode='w') as csv_file:
+    with open(os.path.join(args.save_path, 'detections.csv'), mode='w') as csv_file:
         writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
         for detection in all_detections:
