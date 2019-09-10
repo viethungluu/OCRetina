@@ -86,8 +86,6 @@ class RetinaNetWrapper(object):
         self.num_classes     = max(params.CLASSES.values()) + 1
 
     def predict(self, raw_image, save_path=None):
-        all_detections = [None for i in range(self.num_classes)]
-
         image        = preprocess_image(raw_image.copy())
         image, scale = resize_image(image, min_side=self.image_min_side, max_side=self.image_max_side)
 
@@ -119,8 +117,7 @@ class RetinaNetWrapper(object):
             cv2.imwrite(os.path.join(save_path, 'detection.png'), raw_image)
         
         # copy detections to all_detections
-        for label in range(self.num_classes):
-            all_detections[label] = image_detections[image_detections[:, -1] == label, :-1]
+        all_detections = image_detections[image_detections[:, -1] == self.num_classes - 1, :-1]
 
         return all_detections
 
@@ -178,7 +175,7 @@ def main(args=None):
 
     import csv
     with open('detections.csv', mode='w') as csv_file:
-        writer = csv.writer(csv_file, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
         for detection in all_detections:
             writer.writerow(detection)
