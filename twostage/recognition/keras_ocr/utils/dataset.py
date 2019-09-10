@@ -30,7 +30,7 @@ def speckle(img, scale=255):
 def text_to_labels(text, max_word_len):
 	ret = np.full(max_word_len, -1, dtype=np.int)
 
-	if text = "":
+	if text == "":
 		ret[0] = len(params.ALPHABET)
 		return ret, 1
 
