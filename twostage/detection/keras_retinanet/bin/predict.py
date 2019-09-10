@@ -181,7 +181,7 @@ def main(args=None):
         writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
         for detection in all_detections:
-            writer.writerow(detection)
+            writer.writerow(detection[0])
 
 if __name__ == '__main__':
     main()
