@@ -178,10 +178,10 @@ def main(args=None):
 
     import csv
     with open('detections.csv', mode='w') as csv_file:
-        writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(csv_file, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
         for detection in all_detections:
-            writer.writerow(detection[0])
+            writer.writerow(detection)
 
 if __name__ == '__main__':
     main()
