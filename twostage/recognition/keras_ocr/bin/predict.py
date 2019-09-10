@@ -26,6 +26,7 @@ if __name__ == "__main__" and __package__ is None:
 from ..preprocessing.generator import TextGenerator
 from .. import losses
 from .. import params
+from ..utils.dataset import labels_to_text
 
 def parse_args(args):
     """ Parse the arguments.
