@@ -9,7 +9,8 @@ Facebook's Rosetta system for text detection and recognition in images (source: 
 
 ![Facebook's Rosetta system for text detection and recognition in images (source: Facebook \[3\])](/images/rosetta.PNG)
 
-Two models are trained independently:
+Two models are trained independently including text detection and text recognition. Please refer to [Google Colab Notebookl](https://colab.research.google.com/drive/1fEPLZh888mu3NWrXaTYCKrCAfYmO-W-N) for training and operating commands.
+
 ### Text detection model 
 A RetinaNet model (with ResNet50 as backbone) is trained to detect word-level text (i.e. "love", "friend"), punctuations, and space character. The model is trained using image randomly generated. The font face is fixed for the first 19 epochs. After that, the font face is randomly chosen.
 
@@ -34,7 +35,6 @@ Sample randomly-generated data
 
 ![Sample randomly-generated data](/images/data_recognition.png)
 
-[Google Colab Notebookl](https://colab.research.google.com/drive/1fEPLZh888mu3NWrXaTYCKrCAfYmO-W-N)
 ### Existing problems
 * While the input shape for detection model can be variable, the input shape for recognition must be fixed. This is due to the limitation of tf.dynamic_rnn which expects a fully-defined feature shape during construction. In this solution, the image is scaled to 128 x 64 (width x height) before feeding to recognition model.
 
