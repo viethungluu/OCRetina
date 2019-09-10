@@ -158,7 +158,7 @@ def main(args=None):
         sub_image      = cv2.resize(sub_image, dsize=(args.image_width, args.image_height))
         sub_image      = np.expand_dims(sub_image.T, axis=0)
     
-        pred           = model_p.predict(sub_image)
+        pred           = model.predict(sub_image)
         pred_texts     = decode_predict_ctc(pred, top_paths=1)
         print(pred_texts)
 
