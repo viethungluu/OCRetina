@@ -154,7 +154,7 @@ def main(args=None):
         x1, y1, x2, y2 = all_detections[index]
 
         # preprocessing
-        sub_image      = image[y1 - offset: y2 + offset, x1 - offset: x2 + offset, 3]
+        sub_image      = image[y1 - offset: y2 + offset, x1 - offset: x2 + offset, :]
         sub_image      = cv2.resize(sub_image, dsize=(args.image_width, args.image_height))
         sub_image      = np.expand_dims(sub_image.T, axis=0)
     
