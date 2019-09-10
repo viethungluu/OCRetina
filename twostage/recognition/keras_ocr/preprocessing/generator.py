@@ -91,11 +91,15 @@ class TextGenerator(keras.utils.Sequence):
     def load_data(self, image_index):
         """ Load image and annotations for an image_index.
         """
-        image, annotation = self.paint_func(self.word_list[image_index], 
+        word = self.word_list[image_index]
+        if np.random.rand() >= 0.5:
+            word = word.upper()
+
+        image, annotation = self.paint_func(word, 
                                             image_width=self.image_width,
                                             image_height=self.image_height,
                                             max_word_len=self.max_word_len,
-                                            multi_fonts=True)
+                                            multi_fonts=False)
         
         return image, annotation
 
@@ -161,14 +165,16 @@ class TextGenerator(keras.utils.Sequence):
     def compute_targets(self, annotations_group):
         """ Compute target outputs for the network using images and their annotations.
         """        
-        labels = np.ones([self.batch_size, self.max_word_len + 2])
+        labels = np.ones([self.batch_size, self.max_word_len])
+        input_length = np.zeros([self.batch_size, 1])
+        labels_length = np.zeros([self.batch_size, 1])
 
         for i in range(self.batch_size):
-            labels[i, :-2]  = annotations_group[i]["labels"] # label
-            labels[i, -2]   = self.image_width // self.downsample_factor - 2 # input length
-            labels[i, -1]   = annotations_group[i]["length"] # label length
+            labels[i]         = annotations_group[i]["labels"] # label
+            input_length[i]   = self.image_width // self.downsample_factor - 2 # input length
+            labels_length[i]  = annotations_group[i]["length"] # label length
 
-        return labels[:, :-2], labels[:, -2], labels[:, -1]
+        return labels, input_length, labels_length
 
     def compute_input_output(self, group):
         """ Compute inputs and target outputs for the network.

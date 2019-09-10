@@ -36,7 +36,7 @@ def text_to_labels(text, max_word_len):
 
 	for i, char in enumerate(text):
 		ret[i] = params.ALPHABET.find(char)
-    
+
 	return ret, i + 1
 
 # Reverse translation of numerical classes back to characters
@@ -98,12 +98,15 @@ if __name__ == '__main__':
 	image, annotations 	= paint_text(np.random.choice(test_phrases), 128, 64)
 	print(labels_to_text(annotations["labels"]))
 
-	# image 			= image.transpose((1, 0, 2))
+	image 			= image.transpose((1, 0, 2))
 	# image 			= image[..., 0]
 	# image 			= image.T
 
-	cv2.imshow('image', image)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+	import matplotlib.pyplot as plt
+	plt.imshow(image)
+	plt.show()
 
+	# cv2.imshow('image', image)
+	# cv2.waitKey(0)
+	# cv2.destroyAllWindows()
 	# cv2.imwrite("image.png", image)
