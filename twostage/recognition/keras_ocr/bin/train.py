@@ -23,6 +23,7 @@ if __name__ == "__main__" and __package__ is None:
 
 from ..preprocessing.generator import TextGenerator
 from .. import losses
+from .. import params
 
 def makedirs(path):
 	# Intended behavior: try to create the directory,
@@ -99,16 +100,17 @@ def build_model(args):
 	gru_2b 	= GRU(rnn_size, return_sequences=True, go_backwards=True, kernel_initializer='he_normal', name='gru2_b')(gru1_merged)
 
 	# transforms RNN output to character activations:
-	outputs = Dense(27, kernel_initializer='he_normal', 
+	outputs = Dense(len(params.ALPHABET) + 1, kernel_initializer='he_normal', 
 				name='dense2')(concatenate([gru_2, gru_2b]))
 	
 	y_pred 	= Activation('softmax', name='softmax')(outputs)
 
 	Model(inputs=inputs, outputs=y_pred).summary()
 
-	labels 			= Input(name='the_labels', shape=[args.max_word_len], dtype='float32')
-	input_length 	= Input(name='input_length', shape=[1], dtype='int64')
-	label_length 	= Input(name='label_length', shape=[1], dtype='int64')
+	labels 			= Input(name='the_labels', 		shape=[args.max_word_len], dtype='float32')
+	input_length 	= Input(name='input_length', 	shape=[1], dtype='int64')
+	label_length 	= Input(name='label_length', 	shape=[1], dtype='int64')
+	
 	# Keras doesn't currently support loss funcs with extra parameters
 	# so CTC loss is implemented in a lambda layer
 	loss_out = Lambda(losses.ctc_lambda_func, output_shape=(1,), name='ctc')([y_pred, labels, input_length, label_length])

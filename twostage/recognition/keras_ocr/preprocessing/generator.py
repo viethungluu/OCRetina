@@ -161,9 +161,9 @@ class TextGenerator(keras.utils.Sequence):
         labels = np.ones([self.batch_size, self.max_word_len + 2])
 
         for i in range(self.batch_size):
-            labels[i, :-2] = annotations_group[i]["labels"]
-            labels[i, -2] = self.image_width // self.downsample_factor - 2
-            labels[i, -1] = annotations_group[i]["length"]
+            labels[i, :-2]  = annotations_group[i]["labels"] # label
+            labels[i, -2]   = self.image_width // self.downsample_factor - 2 # input length
+            labels[i, -1]   = annotations_group[i]["length"] # label length
 
         return labels[:, :-2], labels[:, -2], labels[:, -1]
 

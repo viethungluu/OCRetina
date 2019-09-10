@@ -28,7 +28,7 @@ def speckle(img, scale=255):
 
 # Translation of characters to unique integer values
 def text_to_labels(text, max_word_len):
-	ret = np.full(max_word_len, -1)
+	ret = np.full(max_word_len, -1, dtype=np.int)
 	for i, char in enumerate(text):
 		ret[i] = params.ALPHABET.find(char)
     
@@ -88,12 +88,17 @@ def paint_text(word, image_width, image_height, max_word_len=16, font_scale=1, t
 	return image, annotations
 
 if __name__ == '__main__':
-	test_phrases 	= ["love"]
+	test_phrases 	= ["loveisblind"]
 
-	image, label 	= paint_text(np.random.choice(test_phrases), 128, 16)
+	image, annotations 	= paint_text(np.random.choice(test_phrases), 128, 64)
+	print(labels_to_text(annotations["labels"]))
 
-	# cv2.imshow('image', image)
-	# cv2.waitKey(0)
-	# cv2.destroyAllWindows()
+	# image 			= image.transpose((1, 0, 2))
+	# image 			= image[..., 0]
+	# image 			= image.T
 
-	cv2.imwrite("image.png", image)
+	cv2.imshow('image', image)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
+
+	# cv2.imwrite("image.png", image)
