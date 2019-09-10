@@ -122,7 +122,7 @@ class RetinaNetWrapper(object):
         for label in range(self.num_classes):
             all_detections[label] = image_detections[image_detections[:, -1] == label, :-1]
 
-        return np.array(all_detections)
+        return all_detections
 
 def parse_args(args):
     """ Parse the arguments.
@@ -176,8 +176,12 @@ def main(args=None):
     image = cv2.imread(args.image_path)
     all_detections = model.predict(image, args.save_path)
 
-    print(all_detections.shape)
-    all_detections.dump("detections.dat")
+    import csv
+    with open('detections.csv', mode='w') as csv_file:
+        writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+        for detection in all_detections:
+            writer.writerow(detection)
 
 if __name__ == '__main__':
     main()
