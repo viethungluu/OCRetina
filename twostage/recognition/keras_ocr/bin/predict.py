@@ -156,7 +156,10 @@ def main(args=None):
         # preprocessing
         sub_image      = image[y1 - offset: y2 + offset, x1 - offset: x2 + offset, :]
         sub_image      = cv2.resize(sub_image, dsize=(args.image_width, args.image_height))
-        sub_image      = np.expand_dims(sub_image.T, axis=0)
+        sub_image      = np.expand_dims(sub_image, axis=0)
+        sub_image      = sub_image.transpose((0, 2, 1, 3))
+        if K.image_data_format() == 'channels_first':
+            sub_image  = sub_image.transpose((0, 3, 1, 2))
     
         pred           = model.predict(sub_image)
         pred_texts     = decode_predict_ctc(pred, top_paths=1)
