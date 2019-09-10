@@ -135,16 +135,19 @@ def main(args=None):
     all_detections = []
 
     import csv
-    with open(args.detectionn_path, 'rb') as csvfile:
+    with open(args.detectionn_path, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for row in reader:
-            all_detections.append(row[:4])
+            x1, y1, x2, y2 = row[:4]
+            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+            all_detections.append([x1, y1, x2, y2])
 
     all_detections = np.array(all_detections)
     # sort detection be y, x location
     indices = np.lexsort((all_detections[:, 1], all_detections[:, 0]))
     for index in indices:
         x1, y1, x2, y2 = all_detections[index]
+
         # preprocessing
         sub_image      = image[y1: y2, x1: x2, 3]
         sub_image      = cv2.resize(sub_image, dsize=(args.image_width, args.image_height))
