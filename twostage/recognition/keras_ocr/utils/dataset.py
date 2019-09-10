@@ -29,6 +29,11 @@ def speckle(img, scale=255):
 # Translation of characters to unique integer values
 def text_to_labels(text, max_word_len):
 	ret = np.full(max_word_len, -1, dtype=np.int)
+
+	if text = "":
+		ret[0] = len(params.ALPHABET)
+		return ret, 1
+
 	for i, char in enumerate(text):
 		ret[i] = params.ALPHABET.find(char)
     

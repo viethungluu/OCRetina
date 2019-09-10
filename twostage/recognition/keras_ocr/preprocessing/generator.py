@@ -56,7 +56,10 @@ class TextGenerator(keras.utils.Sequence):
                 word_list.append(word)
         
         if self.stage == "train":
-            word_list = word_list[:int(len(word_list) * 0.8)]
+            word_list       = word_list[:int(len(word_list) * 0.8)]
+            blank_inputs    = [""] * len(word_list)
+
+            word_list       = list(sum(zip(word_list, blank_inputs), ()))
         else:
             word_list = word_list[int(len(word_list) * 0.8) :]
 
