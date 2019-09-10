@@ -174,8 +174,9 @@ def main(args=None):
                              image_max_side  = args.image_max_side)
 
     image = cv2.imread(args.image_path)
-    model.predict(image, args.save_path)
+    all_detections = model.predict(image, args.save_path)
 
+    all_detections.dump("detections.dat")
 
 if __name__ == '__main__':
     main()
