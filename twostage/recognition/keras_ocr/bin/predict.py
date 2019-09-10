@@ -123,6 +123,8 @@ def decode_predict_ctc(out, top_paths = 1):
     return results
 
 def main(args=None):
+    offset = 5
+
     # parse arguments
     if args is None:
         args = sys.argv[1:]
@@ -140,6 +142,7 @@ def main(args=None):
         for row in reader:
             x1, y1, x2, y2 = row[:4]
             x1, y1, x2, y2 = float(x1), float(y1), float(x2), float(y2)
+            
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             all_detections.append([x1, y1, x2, y2])
 
@@ -150,7 +153,7 @@ def main(args=None):
         x1, y1, x2, y2 = all_detections[index]
 
         # preprocessing
-        sub_image      = image[y1: y2, x1: x2, 3]
+        sub_image      = image[y1 - offset: y2 + offset, x1 - offset: x2 + offset, 3]
         sub_image      = cv2.resize(sub_image, dsize=(args.image_width, args.image_height))
         sub_image      = np.expand_dims(sub_image.T, axis=0)
     
