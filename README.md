@@ -21,9 +21,11 @@ Test results after 4 epochs
 
 ![Test results after 4 epochs](/images/detection_4.png)
 
-Test results after 19 epochs
+Test results after 20 epochs
 
-![Test results after 19 epochs](/images/detection_19.png)
+![Test results after 20 epochs](/images/detection_20.png)
+
+After 20 epochs, Google Colab banned me from using any hardware resources. Results in this repo are from epoch 20.
 
 [Google Colab Notebook for training detection model](https://drive.google.com/file/d/0B7R3L0qnFcRjcHVGRE9HZHNZeFZ5T0RheVJPdlVlVlJGS0xn/view?usp=sharing)
 
