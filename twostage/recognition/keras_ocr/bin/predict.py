@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import cv2
 
 import keras
 from keras import backend as K
