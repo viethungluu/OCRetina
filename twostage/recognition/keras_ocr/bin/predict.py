@@ -139,6 +139,7 @@ def main(args=None):
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for row in reader:
             x1, y1, x2, y2 = row[:4]
+            x1, y1, x2, y2 = float(x1), float(y1), float(x2), float(y2)
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             all_detections.append([x1, y1, x2, y2])
 
